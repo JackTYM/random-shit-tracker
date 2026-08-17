@@ -2,15 +2,7 @@ import { pgTable, pgEnum, uuid, text, integer, numeric } from 'drizzle-orm/pg-co
 import { crudPolicy, authenticatedRole, authUid } from 'drizzle-orm/neon';
 import { sql } from 'drizzle-orm';
 import { items } from './items';
-
-const ownerDefault = sql`(auth.user_id())`;
-
-// Verifies the referenced items row is owned by the caller. Postgres FK
-// constraints only check existence (not ownership) and bypass RLS entirely,
-// so this must be combined with the owner_id check in every policy below.
-const ownsItem = (itemIdCol: any) => sql`EXISTS (
-  SELECT 1 FROM items WHERE items.id = ${itemIdCol} AND items.owner_id = auth.user_id()
-)`;
+import { ownerDefault, ownsItem } from './_rls';
 
 // --- Rocket Motor ---
 export const motorConstructionEnum = pgEnum('motor_construction', ['Single-Use', 'Reloadable']);

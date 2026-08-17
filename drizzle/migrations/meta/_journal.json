@@ -29,6 +29,13 @@
       "when": 1786926001571,
       "tag": "0003_jazzy_juggernaut",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1786926337669,
+      "tag": "0004_yellow_leper_queen",
+      "breakpoints": true
     }
   ]
 }

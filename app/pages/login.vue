@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({ layout: false });
 
-const { signInEmail, signUpEmail, signInGoogle, isLoggedIn } = useAuth();
+const { signInEmail, signUpEmail, signInGoogle, isLoggedIn, session, refresh } = useAuth();
 
 const mode = ref<'signin' | 'signup'>('signin');
 const email = ref('');
@@ -11,6 +11,12 @@ const error = ref('');
 
 watchEffect(() => {
   if (isLoggedIn.value) navigateTo('/');
+});
+
+onMounted(async () => {
+  if (session.value === null) {
+    await refresh();
+  }
 });
 
 async function submit() {

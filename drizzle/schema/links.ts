@@ -1,8 +1,8 @@
 import { pgTable, uuid, text, integer, boolean, index } from 'drizzle-orm/pg-core';
-import { crudPolicy, authenticatedRole, authUid } from 'drizzle-orm/neon';
+import { crudPolicy, authenticatedRole } from 'drizzle-orm/neon';
 import { sql } from 'drizzle-orm';
 import { items } from './items';
-import { ownerDefault, ownsItem } from './_rls';
+import { ownerDefault, ownsItem, isOwner } from './_rls';
 
 export const itemPhotos = pgTable('item_photos', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -16,8 +16,8 @@ export const itemPhotos = pgTable('item_photos', {
   index('item_photos_item_id_idx').on(table.itemId),
   crudPolicy({
     role: authenticatedRole,
-    read: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)}`,
-    modify: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+    read: sql`${isOwner(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+    modify: sql`${isOwner(table.ownerId)} AND ${ownsItem(table.itemId)}`,
   }),
 ]);
 
@@ -32,7 +32,7 @@ export const itemLinks = pgTable('item_links', {
   index('item_links_related_item_id_idx').on(table.relatedItemId),
   crudPolicy({
     role: authenticatedRole,
-    read: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)} AND ${ownsItem(table.relatedItemId)}`,
-    modify: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)} AND ${ownsItem(table.relatedItemId)}`,
+    read: sql`${isOwner(table.ownerId)} AND ${ownsItem(table.itemId)} AND ${ownsItem(table.relatedItemId)}`,
+    modify: sql`${isOwner(table.ownerId)} AND ${ownsItem(table.itemId)} AND ${ownsItem(table.relatedItemId)}`,
   }),
 ]);

@@ -1,8 +1,8 @@
 import { pgTable, pgEnum, uuid, text, integer, numeric } from 'drizzle-orm/pg-core';
-import { crudPolicy, authenticatedRole, authUid } from 'drizzle-orm/neon';
+import { crudPolicy, authenticatedRole } from 'drizzle-orm/neon';
 import { sql } from 'drizzle-orm';
 import { items } from './items';
-import { ownerDefault, ownsItem } from './_rls';
+import { ownerDefault, ownsItem, isOwner } from './_rls';
 
 // --- Rocket Motor ---
 export const motorConstructionEnum = pgEnum('motor_construction', ['Single-Use', 'Reloadable']);
@@ -22,8 +22,8 @@ export const rocketMotors = pgTable('rocket_motors', {
 }, (table) => [
   crudPolicy({
     role: authenticatedRole,
-    read: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)}`,
-    modify: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+    read: sql`${isOwner(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+    modify: sql`${isOwner(table.ownerId)} AND ${ownsItem(table.itemId)}`,
   }),
 ]);
 
@@ -37,8 +37,8 @@ export const modelRocketKits = pgTable('model_rocket_kits', {
 }, (table) => [
   crudPolicy({
     role: authenticatedRole,
-    read: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)}`,
-    modify: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+    read: sql`${isOwner(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+    modify: sql`${isOwner(table.ownerId)} AND ${ownsItem(table.itemId)}`,
   }),
 ]);
 
@@ -56,8 +56,8 @@ export const modelAirplanes = pgTable('model_airplanes', {
 }, (table) => [
   crudPolicy({
     role: authenticatedRole,
-    read: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)}`,
-    modify: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+    read: sql`${isOwner(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+    modify: sql`${isOwner(table.ownerId)} AND ${ownsItem(table.itemId)}`,
   }),
 ]);
 
@@ -81,8 +81,8 @@ export const modelRocketParts = pgTable('model_rocket_parts', {
 }, (table) => [
   crudPolicy({
     role: authenticatedRole,
-    read: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)}`,
-    modify: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+    read: sql`${isOwner(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+    modify: sql`${isOwner(table.ownerId)} AND ${ownsItem(table.itemId)}`,
   }),
 ]);
 
@@ -101,8 +101,8 @@ export const printedMaterials = pgTable('printed_materials', {
 }, (table) => [
   crudPolicy({
     role: authenticatedRole,
-    read: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)}`,
-    modify: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+    read: sql`${isOwner(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+    modify: sql`${isOwner(table.ownerId)} AND ${ownsItem(table.itemId)}`,
   }),
 ]);
 
@@ -114,7 +114,7 @@ export const otherCollectables = pgTable('other_collectables', {
 }, (table) => [
   crudPolicy({
     role: authenticatedRole,
-    read: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)}`,
-    modify: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+    read: sql`${isOwner(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+    modify: sql`${isOwner(table.ownerId)} AND ${ownsItem(table.itemId)}`,
   }),
 ]);

@@ -1,0 +1,154 @@
+{
+  "id": "1cfa56a4-c9e1-45ec-9837-52e458ee72c8",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.items": {
+      "name": "items",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "(auth.user_id())"
+        },
+        "category": {
+          "name": "category",
+          "type": "category",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "manufacturer_or_club": {
+          "name": "manufacturer_or_club",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "storage_location": {
+          "name": "storage_location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approx_value_usd": {
+          "name": "approx_value_usd",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "value_estimated_at": {
+          "name": "value_estimated_at",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "crud-authenticated-policy-select": {
+          "name": "crud-authenticated-policy-select",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select auth.user_id() = \"items\".\"owner_id\")"
+        },
+        "crud-authenticated-policy-insert": {
+          "name": "crud-authenticated-policy-insert",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "(select auth.user_id() = \"items\".\"owner_id\")"
+        },
+        "crud-authenticated-policy-update": {
+          "name": "crud-authenticated-policy-update",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select auth.user_id() = \"items\".\"owner_id\")",
+          "withCheck": "(select auth.user_id() = \"items\".\"owner_id\")"
+        },
+        "crud-authenticated-policy-delete": {
+          "name": "crud-authenticated-policy-delete",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select auth.user_id() = \"items\".\"owner_id\")"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.category": {
+      "name": "category",
+      "schema": "public",
+      "values": [
+        "motor",
+        "kit",
+        "plane",
+        "part",
+        "print",
+        "other"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

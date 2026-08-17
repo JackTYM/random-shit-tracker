@@ -11,7 +11,7 @@ export async function requireUserId(event: H3Event): Promise<string> {
   }
   const token = authHeader.slice('Bearer '.length);
 
-  if (!_jwks) {
+  if (!_jwks || !_issuer) {
     const config = useRuntimeConfig(event);
     _jwks = createRemoteJWKSet(new URL(`${config.public.neonAuthUrl}/.well-known/jwks.json`));
     // Neon Auth issues tokens with iss/aud set to the auth server's origin.

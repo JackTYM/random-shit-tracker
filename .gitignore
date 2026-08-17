@@ -6,6 +6,9 @@
 .cache
 dist
 
+# Wrangler local dev cache
+.wrangler
+
 # Node dependencies
 node_modules
 

@@ -11,7 +11,7 @@ export async function requireUserId(event: H3Event): Promise<string> {
   }
   const token = authHeader.slice('Bearer '.length);
 
-  if (!_jwks || !_issuer) {
+  if (!_jwks) {
     const config = useRuntimeConfig(event);
     _jwks = createRemoteJWKSet(new URL(`${config.public.neonAuthUrl}/.well-known/jwks.json`));
     // Neon Auth issues tokens with iss/aud set to the auth server's origin.
@@ -22,7 +22,8 @@ export async function requireUserId(event: H3Event): Promise<string> {
     const { payload } = await jwtVerify(token, _jwks, { issuer: _issuer, audience: _issuer });
     if (!payload.sub) throw new Error('missing sub claim');
     return payload.sub;
-  } catch {
+  } catch (err) {
+    console.error('[requireUserId] JWT verification failed:', err);
     throw createError({ statusCode: 401, statusMessage: 'Invalid token' });
   }
 }

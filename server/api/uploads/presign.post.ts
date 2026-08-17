@@ -1,11 +1,16 @@
 import { createR2Client, r2ObjectUrl } from '../../utils/r2';
 import { requireUserId } from '../../utils/verifyAuth';
 
+const ALLOWED_CONTENT_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+
 export default defineEventHandler(async (event) => {
   const userId = await requireUserId(event);
   const body = await readBody<{ filename: string; contentType: string }>(event);
   if (!body?.filename || !body?.contentType) {
     throw createError({ statusCode: 400, statusMessage: 'filename and contentType are required' });
+  }
+  if (!ALLOWED_CONTENT_TYPES.has(body.contentType)) {
+    throw createError({ statusCode: 400, statusMessage: 'Unsupported content type' });
   }
 
   const config = useRuntimeConfig(event);

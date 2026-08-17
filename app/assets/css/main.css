@@ -1,1 +1,38 @@
-/* main styles — filled in by a later task */
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-paper);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-ui);
+  color: var(--color-navy);
+}
+
+a {
+  color: var(--color-rust);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(194, 65, 12, 0.4);
+}
+
+a:hover {
+  color: var(--color-navy);
+  border-bottom-color: var(--color-navy);
+}
+
+input, select, textarea, button {
+  font-family: var(--font-ui);
+}
+
+select {
+  appearance: none;
+  background-image: none;
+}
+
+::placeholder {
+  color: rgba(22, 34, 76, 0.35);
+}

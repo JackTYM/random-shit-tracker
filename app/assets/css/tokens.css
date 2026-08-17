@@ -1,1 +1,13 @@
-/* design tokens — filled in by a later task */
+:root {
+  --color-navy: #16224C;
+  --color-orange: #E4571B;
+  --color-rust: #C2410C;
+  --color-paper: #F5F1E8;
+  --color-paper-alt: #EFEADD;
+  --color-white: #ffffff;
+  --color-line: rgba(22, 34, 76, 0.35);
+
+  --font-ui: 'Archivo', sans-serif;
+  --font-display: 'Archivo Black', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}

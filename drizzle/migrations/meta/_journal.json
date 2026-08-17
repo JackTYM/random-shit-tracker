@@ -8,6 +8,13 @@
       "when": 1786925067522,
       "tag": "0000_hot_tarantula",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1786925420843,
+      "tag": "0001_supreme_maggott",
+      "breakpoints": true
     }
   ]
 }

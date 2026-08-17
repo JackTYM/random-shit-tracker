@@ -5,6 +5,13 @@ import { items } from './items';
 
 const ownerDefault = sql`(auth.user_id())`;
 
+// Verifies the referenced items row is owned by the caller. Postgres FK
+// constraints only check existence (not ownership) and bypass RLS entirely,
+// so this must be combined with the owner_id check in every policy below.
+const ownsItem = (itemIdCol: any) => sql`EXISTS (
+  SELECT 1 FROM items WHERE items.id = ${itemIdCol} AND items.owner_id = auth.user_id()
+)`;
+
 // --- Rocket Motor ---
 export const motorConstructionEnum = pgEnum('motor_construction', ['Single-Use', 'Reloadable']);
 export const motorCertificationEnum = pgEnum('motor_certification_status', ['Certified', 'Collectable', 'Out of Certification']);
@@ -21,7 +28,26 @@ export const rocketMotors = pgTable('rocket_motors', {
   quantity: integer('quantity'),
   propellantType: motorPropellantEnum('propellant_type'),
 }, (table) => [
-  crudPolicy({ role: authenticatedRole, read: authUid(table.ownerId), modify: authUid(table.ownerId) }),
+  crudPolicy({
+    role: authenticatedRole,
+    read: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+    modify: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+  }),
+]);
+
+// --- Model Rocket Kit ---
+export const modelRocketKits = pgTable('model_rocket_kits', {
+  itemId: uuid('item_id').primaryKey().references(() => items.id, { onDelete: 'cascade' }),
+  ownerId: uuid('owner_id').notNull().default(ownerDefault),
+  motorDiameterMm: numeric('motor_diameter_mm'),
+  diameterIn: numeric('diameter_in'),
+  lengthIn: numeric('length_in'),
+}, (table) => [
+  crudPolicy({
+    role: authenticatedRole,
+    read: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+    modify: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+  }),
 ]);
 
 // --- Model Airplane ---
@@ -36,18 +62,11 @@ export const modelAirplanes = pgTable('model_airplanes', {
   modelSubtype: airplaneModelSubtypeEnum('model_subtype'),
   modelSubtypeOther: text('model_subtype_other'),
 }, (table) => [
-  crudPolicy({ role: authenticatedRole, read: authUid(table.ownerId), modify: authUid(table.ownerId) }),
-]);
-
-// --- Model Rocket Kit ---
-export const modelRocketKits = pgTable('model_rocket_kits', {
-  itemId: uuid('item_id').primaryKey().references(() => items.id, { onDelete: 'cascade' }),
-  ownerId: uuid('owner_id').notNull().default(ownerDefault),
-  motorDiameterMm: numeric('motor_diameter_mm'),
-  diameterIn: numeric('diameter_in'),
-  lengthIn: numeric('length_in'),
-}, (table) => [
-  crudPolicy({ role: authenticatedRole, read: authUid(table.ownerId), modify: authUid(table.ownerId) }),
+  crudPolicy({
+    role: authenticatedRole,
+    read: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+    modify: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+  }),
 ]);
 
 // --- Model Rocket Part ---
@@ -68,7 +87,11 @@ export const modelRocketParts = pgTable('model_rocket_parts', {
   diameter: text('diameter'),
   origin: partOriginEnum('origin'),
 }, (table) => [
-  crudPolicy({ role: authenticatedRole, read: authUid(table.ownerId), modify: authUid(table.ownerId) }),
+  crudPolicy({
+    role: authenticatedRole,
+    read: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+    modify: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+  }),
 ]);
 
 // --- Books / Printed Material ---
@@ -84,7 +107,11 @@ export const printedMaterials = pgTable('printed_materials', {
   volumeOrIssue: text('volume_or_issue'),
   kitNumber: text('kit_number'),
 }, (table) => [
-  crudPolicy({ role: authenticatedRole, read: authUid(table.ownerId), modify: authUid(table.ownerId) }),
+  crudPolicy({
+    role: authenticatedRole,
+    read: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+    modify: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+  }),
 ]);
 
 // --- Other Collectable ---
@@ -93,5 +120,9 @@ export const otherCollectables = pgTable('other_collectables', {
   ownerId: uuid('owner_id').notNull().default(ownerDefault),
   type: text('type'),
 }, (table) => [
-  crudPolicy({ role: authenticatedRole, read: authUid(table.ownerId), modify: authUid(table.ownerId) }),
+  crudPolicy({
+    role: authenticatedRole,
+    read: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+    modify: sql`${authUid(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+  }),
 ]);

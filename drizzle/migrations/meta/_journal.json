@@ -22,6 +22,13 @@
       "when": 1786925780074,
       "tag": "0002_faithful_mandarin",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1786926001571,
+      "tag": "0003_jazzy_juggernaut",
+      "breakpoints": true
     }
   ]
 }

@@ -15,6 +15,13 @@
       "when": 1787039667399,
       "tag": "0001_create_item_functions",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1787040182141,
+      "tag": "0002_default_null_item_function_params",
+      "breakpoints": true
     }
   ]
 }

@@ -127,6 +127,7 @@ async function save(andAddAnother: boolean) {
       </div>
     </div>
 
+    <!-- Section 1: General -->
     <div style="background: #fff; border: 1px solid var(--color-navy)">
       <div style="background: var(--color-navy); color: var(--color-paper); padding: 9px 16px; display: flex; align-items: center; gap: 10px">
         <span style="background: var(--color-orange); color: var(--color-navy); width: 19px; height: 19px; display: flex; align-items: center; justify-content: center; font: 400 11px 'Archivo Black', sans-serif">1</span>
@@ -170,6 +171,7 @@ async function save(andAddAnother: boolean) {
       </div>
     </div>
 
+    <!-- Section 2: Category -->
     <div style="background: #fff; border: 1px solid var(--color-navy); border-top: 0">
       <div style="background: var(--color-navy); color: var(--color-paper); padding: 9px 16px; display: flex; align-items: center; gap: 10px">
         <span style="background: var(--color-orange); color: var(--color-navy); width: 19px; height: 19px; display: flex; align-items: center; justify-content: center; font: 400 11px 'Archivo Black', sans-serif">2</span>
@@ -197,6 +199,7 @@ async function save(andAddAnother: boolean) {
       </div>
     </div>
 
+    <!-- Section 3: Category-specific -->
     <div v-if="selectedCategory" style="background: #fff; border: 1px solid var(--color-navy); border-top: 0">
       <div style="background: var(--color-orange); color: var(--color-navy); padding: 9px 16px; display: flex; align-items: center; gap: 10px">
         <span style="background: var(--color-navy); color: var(--color-paper); width: 19px; height: 19px; display: flex; align-items: center; justify-content: center; font: 400 11px 'Archivo Black', sans-serif">3</span>

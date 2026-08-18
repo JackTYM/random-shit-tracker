@@ -8,6 +8,8 @@ export function useUploadPhoto() {
 
   async function uploadPhoto(file: File): Promise<UploadedPhoto> {
     const { data } = await client.auth.getSession();
+    // data.session.token is undocumented internal wiring in @neondatabase/neon-js (beta) —
+    // re-verify this still works after any package version bump.
     const jwt = data?.session?.token;
     if (!jwt) throw new Error('Not signed in');
 

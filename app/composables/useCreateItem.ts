@@ -43,7 +43,7 @@ export function useCreateItem() {
       ...categoryFields,
     });
 
-    if (error) throw new Error(error.message);
+    if (error) throw error;
     if (!itemId || typeof itemId !== 'string') {
       throw new Error('Item creation did not return a valid id');
     }
@@ -58,7 +58,7 @@ export function useCreateItem() {
           is_primary: i === 0,
         })),
       );
-      if (photoError) throw new Error(photoError.message);
+      if (photoError) throw photoError;
     }
 
     return itemId;

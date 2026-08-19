@@ -1,20 +1,56 @@
 <script setup lang="ts">
+import { CATEGORY_LABELS } from '~/data/categoryFormFields';
+
 const { session, signOut } = useAuth();
+const { searchItems } = useSearchItems();
 
 const navItems = [
-  'Dashboard',
-  'Browse',
-  'Rocket Motors',
-  'Model Airplanes',
-  'Rocket Kits',
-  'Rocket Parts',
-  'Books & Printed',
-  'Storage',
+  { label: 'Dashboard', to: '/' },
+  { label: 'Browse', to: '/browse' },
+  { label: 'Rocket Motors', to: '/browse?category=motor' },
+  { label: 'Model Airplanes', to: '/browse?category=plane' },
+  { label: 'Rocket Kits', to: '/browse?category=kit' },
+  { label: 'Rocket Parts', to: '/browse?category=part' },
+  { label: 'Books & Printed', to: '/browse?category=print' },
+  { label: 'Other Collectables', to: '/browse?category=other' },
+  { label: 'Storage', to: '/storage' },
 ];
 
 async function handleSignOut() {
   await signOut();
   await navigateTo('/login');
+}
+
+const searchQuery = ref('');
+const searchResults = ref<{ id: string; name: string; category: string }[]>([]);
+const searchOpen = ref(false);
+let searchDebounce: ReturnType<typeof setTimeout> | null = null;
+
+watch(searchQuery, (q) => {
+  if (searchDebounce) clearTimeout(searchDebounce);
+  if (!q.trim()) {
+    searchResults.value = [];
+    searchOpen.value = false;
+    return;
+  }
+  searchDebounce = setTimeout(async () => {
+    const results = await searchItems(q);
+    if (q === searchQuery.value) {
+      searchResults.value = results;
+      searchOpen.value = true;
+    }
+  }, 250);
+});
+
+function selectResult(id: string) {
+  searchOpen.value = false;
+  searchQuery.value = '';
+  searchResults.value = [];
+  navigateTo(`/items/${id}`);
+}
+
+function closeSearch() {
+  searchOpen.value = false;
 }
 </script>
 
@@ -29,32 +65,42 @@ async function handleSignOut() {
       </div>
 
       <nav style="display: flex; gap: 2px; flex: 1">
-        <template v-for="n in navItems" :key="n">
-          <NuxtLink
-            v-if="n === 'Browse'"
-            to="/browse"
-            style="border: 0; cursor: pointer; padding: 7px 11px; font: 600 11px 'Archivo', sans-serif; letter-spacing: 0.09em; text-transform: uppercase; background: transparent; color: var(--color-paper); text-decoration: none"
-          >
-            {{ n }}
-          </NuxtLink>
-          <button
-            v-else
-            disabled
-            title="Ships in Phase 2"
-            style="border: 0; cursor: not-allowed; opacity: 0.4; padding: 7px 11px; font: 600 11px 'Archivo', sans-serif; letter-spacing: 0.09em; text-transform: uppercase; background: transparent; color: var(--color-paper)"
-          >
-            {{ n }}
-          </button>
-        </template>
+        <NuxtLink
+          v-for="n in navItems"
+          :key="n.label"
+          :to="n.to"
+          style="border: 0; cursor: pointer; padding: 7px 11px; font: 600 11px 'Archivo', sans-serif; letter-spacing: 0.09em; text-transform: uppercase; background: transparent; color: var(--color-paper); text-decoration: none"
+        >
+          {{ n.label }}
+        </NuxtLink>
       </nav>
 
       <div style="display: flex; align-items: center; gap: 10px; flex: none">
-        <input
-          disabled
-          placeholder="Search the collection…"
-          title="Ships in Phase 2"
-          style="width: 230px; padding: 8px 11px; border: 1px solid rgba(245,241,232,0.3); background: rgba(245,241,232,0.08); color: var(--color-paper); font-size: 13px"
-        />
+        <div style="position: relative">
+          <input
+            v-model="searchQuery"
+            placeholder="Search the collection…"
+            style="width: 230px; padding: 8px 11px; border: 1px solid rgba(245,241,232,0.3); background: rgba(245,241,232,0.08); color: var(--color-paper); font-size: 13px"
+            @focus="searchResults.length > 0 && (searchOpen = true)"
+            @blur="setTimeout(closeSearch, 150)"
+            @keydown.escape="closeSearch"
+          />
+          <div
+            v-if="searchOpen"
+            style="position: absolute; top: 100%; left: 0; width: 280px; margin-top: 4px; background: #fff; border: 1px solid var(--color-navy); z-index: 30; max-height: 260px; overflow-y: auto"
+          >
+            <div v-if="searchResults.length === 0" style="padding: 10px 12px; font-size: 12.5px; color: rgba(22,34,76,0.5)">No matches</div>
+            <button
+              v-for="r in searchResults"
+              :key="r.id"
+              type="button"
+              style="display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid rgba(22,34,76,0.1); background: transparent; cursor: pointer; padding: 9px 12px; font-size: 13px; color: var(--color-navy)"
+              @click="selectResult(r.id)"
+            >
+              {{ r.name }} <span style="opacity: 0.6; font-size: 11px">({{ CATEGORY_LABELS[r.category] }})</span>
+            </button>
+          </div>
+        </div>
         <NuxtLink
           to="/items/new"
           style="border: 0; cursor: pointer; background: var(--color-orange); color: var(--color-navy); padding: 9px 14px; font: 400 12px 'Archivo Black', sans-serif; letter-spacing: 0.06em; white-space: nowrap; flex: none; text-decoration: none"

@@ -44,6 +44,17 @@ const selectedStorages = ref<Set<string>>(new Set());
 const missingValueOnly = ref(route.query.missingValue === 'true');
 const sortBy = ref<'newest' | 'name' | 'value'>('newest');
 
+watch(
+  () => route.query,
+  (query) => {
+    selectedCategories.value =
+      typeof query.category === 'string' && query.category in CATEGORY_LABELS
+        ? new Set([query.category])
+        : new Set();
+    missingValueOnly.value = query.missingValue === 'true';
+  }
+);
+
 function toggle(set: Set<string>, value: string) {
   if (set.has(value)) set.delete(value);
   else set.add(value);

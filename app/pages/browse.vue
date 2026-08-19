@@ -32,9 +32,16 @@ async function load() {
 
 onMounted(load);
 
-const selectedCategories = ref<Set<string>>(new Set());
+const route = useRoute();
+
+const selectedCategories = ref<Set<string>>(
+  typeof route.query.category === 'string' && route.query.category in CATEGORY_LABELS
+    ? new Set([route.query.category])
+    : new Set()
+);
 const selectedManufacturers = ref<Set<string>>(new Set());
 const selectedStorages = ref<Set<string>>(new Set());
+const missingValueOnly = ref(route.query.missingValue === 'true');
 const sortBy = ref<'newest' | 'name' | 'value'>('newest');
 
 function toggle(set: Set<string>, value: string) {
@@ -83,6 +90,9 @@ const filteredItems = computed(() => {
   if (selectedStorages.value.size > 0) {
     result = result.filter((it) => it.storage_location && selectedStorages.value.has(it.storage_location));
   }
+  if (missingValueOnly.value) {
+    result = result.filter((it) => it.approx_value_usd === null);
+  }
 
   const sorted = [...result];
   if (sortBy.value === 'name') {
@@ -99,6 +109,7 @@ function clearFilters() {
   selectedCategories.value = new Set();
   selectedManufacturers.value = new Set();
   selectedStorages.value = new Set();
+  missingValueOnly.value = false;
 }
 </script>
 
@@ -162,6 +173,20 @@ function clearFilters() {
             {{ opt.label }}
           </button>
         </div>
+        <div style="height: 1px; background: rgba(22,34,76,0.2); margin: 14px 0" />
+        <button
+          type="button"
+          :style="{
+            width: '100%', textAlign: 'left', border: '1px solid var(--color-navy)',
+            background: missingValueOnly ? 'var(--color-navy)' : 'transparent',
+            color: missingValueOnly ? 'var(--color-paper)' : 'var(--color-navy)',
+            cursor: 'pointer', padding: '7px 9px',
+            font: `600 11px 'Archivo', sans-serif`, letterSpacing: '0.04em', textTransform: 'uppercase',
+          }"
+          @click="missingValueOnly = !missingValueOnly"
+        >
+          MISSING VALUE ESTIMATE
+        </button>
         <button
           type="button"
           style="width: 100%; margin-top: 16px; border: 1px dashed rgba(22,34,76,0.45); background: transparent; color: var(--color-navy); cursor: pointer; padding: 8px; font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.1em"

@@ -272,7 +272,10 @@ watch(linkSearchQuery, (q) => {
   searchDebounce = setTimeout(async () => {
     linkSearching.value = true;
     try {
-      linkSearchResults.value = await searchItems(q, itemId);
+      const results = await searchItems(q, itemId);
+      if (q === linkSearchQuery.value) {
+        linkSearchResults.value = results;
+      }
     } finally {
       linkSearching.value = false;
     }
@@ -370,6 +373,7 @@ onMounted(async () => {
           <button type="button" :disabled="duplicating" style="border: 1px solid var(--color-navy); cursor: pointer; background: transparent; color: var(--color-navy); padding: 10px 15px; font: 600 11px 'Archivo', sans-serif; letter-spacing: 0.08em; text-transform: uppercase" @click="duplicateItem">
             {{ duplicating ? 'Duplicating…' : 'Duplicate' }}
           </button>
+          <span v-if="saveError" style="color: var(--color-rust); font-size: 12.5px">{{ saveError }}</span>
         </div>
 
         <template v-if="!editing">

@@ -20,7 +20,7 @@ async function handleSignOut() {
       Sign out
     </button>
     <p style="margin-top: 24px; font-size: 13px; color: rgba(22,34,76,0.6)">
-      Dashboard, browse, and item pages ship in Phase 2.
+      Dashboard, storage, and search ship in Phase 2c.
     </p>
   </main>
 </template>

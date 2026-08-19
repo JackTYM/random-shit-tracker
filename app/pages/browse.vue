@@ -49,6 +49,8 @@ watch(
   (query) => {
     selectedCategories.value = deriveSelectedCategories(query.category);
     missingValueOnly.value = query.missingValue === 'true';
+    selectedManufacturers.value = new Set();
+    selectedStorages.value = new Set();
   }
 );
 

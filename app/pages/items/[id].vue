@@ -7,6 +7,9 @@ const itemId = route.params.id as string;
 const { getItem, categoryDetail } = useItems();
 const { updateItem } = useUpdateItem();
 const client = useNeonClient();
+const { createItem } = useCreateItem();
+const { uploadPhoto } = useUploadPhoto();
+const { listLinks, createLink, searchItems } = useItemLinks();
 
 const item = ref<any>(null);
 const photos = ref<{ id: string; r2_key: string; url: string; sort_order: number; is_primary: boolean }[]>([]);
@@ -155,7 +158,170 @@ async function saveEdit() {
   }
 }
 
-onMounted(loadItem);
+// --- Duplicate ---
+
+const duplicating = ref(false);
+
+async function duplicateItem() {
+  if (!item.value) return;
+  duplicating.value = true;
+  saveError.value = '';
+  try {
+    const detail = categoryDetail(item.value);
+    const config = CATEGORY_FORM_FIELDS[item.value.category] ?? [];
+    const categoryPayload: Record<string, unknown> = {};
+    for (const f of config) {
+      const columnKey = f.key.replace(/^p_/, '');
+      categoryPayload[f.key] = detail?.[columnKey] ?? null;
+      if (f.otherKey) {
+        const otherColumnKey = f.otherKey.replace(/^p_/, '');
+        categoryPayload[f.otherKey] = detail?.[otherColumnKey] ?? null;
+      }
+    }
+
+    const newItemId = await createItem(
+      item.value.category,
+      {
+        name: `Copy of ${item.value.name}`,
+        manufacturerOrClub: item.value.manufacturer_or_club,
+        storageLocation: item.value.storage_location,
+        approxValueUsd: item.value.approx_value_usd != null ? Number(item.value.approx_value_usd) : null,
+        valueEstimatedAt: item.value.value_estimated_at,
+        notes: item.value.notes,
+      },
+      categoryPayload,
+      [],
+    );
+
+    if (photos.value.length > 0) {
+      const { error: photoError } = await client.from('item_photos').insert(
+        photos.value.map((p) => ({
+          item_id: newItemId,
+          r2_key: p.r2_key,
+          url: p.url,
+          sort_order: p.sort_order,
+          is_primary: p.is_primary,
+        })),
+      );
+      if (photoError) throw photoError;
+    }
+
+    await navigateTo(`/items/${newItemId}`);
+  } catch (e: any) {
+    saveError.value = e?.message ?? 'Failed to duplicate item.';
+  } finally {
+    duplicating.value = false;
+  }
+}
+
+// --- Add photo ---
+
+const addingPhoto = ref(false);
+
+async function handleAddPhoto(e: Event) {
+  const input = e.target as HTMLInputElement;
+  const files = input.files ? Array.from(input.files) : [];
+  if (!files.length || !item.value) return;
+  addingPhoto.value = true;
+  saveError.value = '';
+  try {
+    const hadNoPhotos = photos.value.length === 0;
+    const startOrder = hadNoPhotos ? 0 : Math.max(...photos.value.map((p) => p.sort_order)) + 1;
+    const rows: { item_id: string; r2_key: string; url: string; sort_order: number; is_primary: boolean }[] = [];
+    for (let i = 0; i < files.length; i++) {
+      const uploaded = await uploadPhoto(files[i]);
+      rows.push({
+        item_id: itemId,
+        r2_key: uploaded.key,
+        url: uploaded.publicUrl,
+        sort_order: startOrder + i,
+        is_primary: hadNoPhotos && i === 0,
+      });
+    }
+    const { error: insertError } = await client.from('item_photos').insert(rows);
+    if (insertError) throw insertError;
+    await loadItem();
+  } catch (e: any) {
+    saveError.value = e?.message ?? 'Failed to add photo.';
+  } finally {
+    addingPhoto.value = false;
+    input.value = '';
+  }
+}
+
+// --- Linking ---
+
+const links = ref<{ linkId: string; id: string; name: string; category: string; relationshipLabel: string }[]>([]);
+
+async function loadLinks() {
+  links.value = await listLinks(itemId);
+}
+
+const showLinkPicker = ref(false);
+const linkSearchQuery = ref('');
+const linkSearchResults = ref<{ id: string; name: string; category: string }[]>([]);
+const linkSearching = ref(false);
+const pickedItem = ref<{ id: string; name: string; category: string } | null>(null);
+const linkLabel = ref('');
+const linkError = ref('');
+const linking = ref(false);
+
+let searchDebounce: ReturnType<typeof setTimeout> | null = null;
+watch(linkSearchQuery, (q) => {
+  if (searchDebounce) clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(async () => {
+    linkSearching.value = true;
+    try {
+      linkSearchResults.value = await searchItems(q, itemId);
+    } finally {
+      linkSearching.value = false;
+    }
+  }, 250);
+});
+
+function openLinkPicker() {
+  showLinkPicker.value = true;
+  linkSearchQuery.value = '';
+  linkSearchResults.value = [];
+  pickedItem.value = null;
+  linkLabel.value = '';
+  linkError.value = '';
+}
+
+function closeLinkPicker() {
+  showLinkPicker.value = false;
+}
+
+function pickItem(result: { id: string; name: string; category: string }) {
+  pickedItem.value = result;
+}
+
+async function submitLink() {
+  if (!pickedItem.value) {
+    linkError.value = 'Pick an item first.';
+    return;
+  }
+  if (!linkLabel.value.trim()) {
+    linkError.value = 'Describe the relationship.';
+    return;
+  }
+  linking.value = true;
+  linkError.value = '';
+  try {
+    await createLink(itemId, pickedItem.value.id, linkLabel.value.trim());
+    await loadLinks();
+    closeLinkPicker();
+  } catch (e: any) {
+    linkError.value = e?.message ?? 'Failed to create link.';
+  } finally {
+    linking.value = false;
+  }
+}
+
+onMounted(async () => {
+  await loadItem();
+  await loadLinks();
+});
 </script>
 
 <template>
@@ -170,7 +336,8 @@ onMounted(loadItem);
     <div v-if="loading" style="font: 500 12px 'JetBrains Mono', monospace; color: rgba(22,34,76,0.6)">Loading…</div>
     <p v-else-if="loadError" style="color: var(--color-rust)">{{ loadError }}</p>
 
-    <div v-else-if="item" style="display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 28px; align-items: start">
+    <template v-else-if="item">
+    <div style="display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 28px; align-items: start">
       <div>
         <div style="border: 1px solid var(--color-navy); background: #fff; height: 520px; overflow: hidden">
           <img v-if="primaryPhoto" :src="primaryPhoto.url" :alt="item.name" style="width: 100%; height: 100%; object-fit: contain; display: block; background: var(--color-paper)" />
@@ -196,7 +363,13 @@ onMounted(loadItem);
 
         <div v-if="!editing" style="display: flex; gap: 8px; margin-top: 18px">
           <button type="button" style="border: 0; cursor: pointer; background: var(--color-navy); color: var(--color-paper); padding: 10px 15px; font: 400 11px 'Archivo Black', sans-serif; letter-spacing: 0.08em" @click="startEdit">EDIT ENTRY</button>
-          <!-- Task 8 adds Add photo / Duplicate buttons here -->
+          <label style="border: 1px solid var(--color-navy); cursor: pointer; background: transparent; color: var(--color-navy); padding: 10px 15px; font: 600 11px 'Archivo', sans-serif; letter-spacing: 0.08em; text-transform: uppercase">
+            {{ addingPhoto ? 'Uploading…' : 'Add photo' }}
+            <input type="file" accept="image/jpeg,image/png,image/webp" multiple :disabled="addingPhoto" style="display: none" @change="handleAddPhoto" />
+          </label>
+          <button type="button" :disabled="duplicating" style="border: 1px solid var(--color-navy); cursor: pointer; background: transparent; color: var(--color-navy); padding: 10px 15px; font: 600 11px 'Archivo', sans-serif; letter-spacing: 0.08em; text-transform: uppercase" @click="duplicateItem">
+            {{ duplicating ? 'Duplicating…' : 'Duplicate' }}
+          </button>
         </div>
 
         <template v-if="!editing">
@@ -274,5 +447,81 @@ onMounted(loadItem);
         </template>
       </div>
     </div>
+
+      <div style="margin-top: 38px; border: 1px solid var(--color-navy); background: #fff">
+        <div style="background: var(--color-navy); color: var(--color-paper); padding: 9px 16px; display: flex; justify-content: space-between; align-items: center">
+          <span style="font: 400 11px 'Archivo Black', sans-serif; letter-spacing: 0.12em">RELATED IN COLLECTION</span>
+          <span style="font: 400 10px 'JetBrains Mono', monospace; color: rgba(245,241,232,0.6)">{{ links.length }} LINK{{ links.length === 1 ? '' : 'S' }}</span>
+        </div>
+        <div v-if="links.length > 0" style="padding: 26px 20px; display: grid; grid-template-columns: 1fr auto 1fr; gap: 0; align-items: center; background: repeating-linear-gradient(90deg, rgba(22,34,76,0.045) 0 1px, transparent 1px 26px)">
+          <div style="display: flex; flex-direction: column; gap: 14px; align-items: flex-end">
+            <div v-for="r in links.filter((_, i) => i % 2 === 0)" :key="r.linkId" style="display: flex; align-items: center; gap: 0; width: 100%; justify-content: flex-end">
+              <div style="background: var(--color-paper); border: 1px solid var(--color-navy); padding: 10px 13px; cursor: pointer; max-width: 280px; flex: none" @click="navigateTo(`/items/${r.id}`)">
+                <div style="font: 700 9px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: var(--color-rust)">{{ r.relationshipLabel.toUpperCase() }}</div>
+                <div style="font: 400 13px 'Archivo Black', sans-serif; text-transform: uppercase; margin-top: 4px">{{ r.name }}</div>
+                <div style="font: 400 10px 'JetBrains Mono', monospace; color: rgba(22,34,76,0.65); margin-top: 3px">{{ CATEGORY_LABELS[r.category]?.toUpperCase() }}</div>
+              </div>
+              <div style="width: 54px; border-top: 1px dashed var(--color-navy); flex: none" />
+            </div>
+          </div>
+          <div style="background: var(--color-orange); border: 1px solid var(--color-navy); padding: 14px 18px; text-align: center; max-width: 230px">
+            <div style="font: 700 9px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.75)">THIS ITEM</div>
+            <div style="font: 400 17px 'Archivo Black', sans-serif; text-transform: uppercase; line-height: 1.1; margin-top: 5px">{{ item.name }}</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 14px; align-items: flex-start">
+            <div v-for="r in links.filter((_, i) => i % 2 === 1)" :key="r.linkId" style="display: flex; align-items: center; width: 100%">
+              <div style="width: 54px; border-top: 1px dashed var(--color-navy); flex: none" />
+              <div style="background: var(--color-paper); border: 1px solid var(--color-navy); padding: 10px 13px; cursor: pointer; max-width: 280px; flex: none" @click="navigateTo(`/items/${r.id}`)">
+                <div style="font: 700 9px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: var(--color-rust)">{{ r.relationshipLabel.toUpperCase() }}</div>
+                <div style="font: 400 13px 'Archivo Black', sans-serif; text-transform: uppercase; margin-top: 4px">{{ r.name }}</div>
+                <div style="font: 400 10px 'JetBrains Mono', monospace; color: rgba(22,34,76,0.65); margin-top: 3px">{{ CATEGORY_LABELS[r.category]?.toUpperCase() }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="border-top: 1px dashed rgba(22,34,76,0.35); padding: 12px 16px; display: flex; gap: 8px; align-items: center">
+          <button type="button" style="border: 1px dashed rgba(22,34,76,0.5); background: transparent; cursor: pointer; padding: 8px 12px; font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.1em; color: var(--color-navy)" @click="openLinkPicker">+ LINK ANOTHER ITEM</button>
+          <span style="font: 400 10.5px 'JetBrains Mono', monospace; color: rgba(22,34,76,0.55)">Links are two-way — plans, catalogs, motors and parts all cross-reference.</span>
+        </div>
+      </div>
+
+      <div v-if="showLinkPicker" style="position: fixed; inset: 0; background: rgba(22,34,76,0.5); display: flex; align-items: center; justify-content: center; z-index: 50" @click.self="closeLinkPicker">
+        <div style="background: #fff; border: 1px solid var(--color-navy); width: 420px; padding: 20px">
+          <div style="font: 400 14px 'Archivo Black', sans-serif; text-transform: uppercase; margin-bottom: 12px">Link another item</div>
+          <input
+            v-model="linkSearchQuery"
+            type="text"
+            placeholder="Search your collection by name…"
+            style="width: 100%; padding: 9px 11px; border: 1px solid var(--color-navy); background: var(--color-paper); font-size: 13.5px; color: var(--color-navy)"
+          />
+          <div style="max-height: 180px; overflow-y: auto; margin-top: 8px; display: flex; flex-direction: column; gap: 4px">
+            <div v-if="linkSearching" style="font-size: 12px; color: rgba(22,34,76,0.5)">Searching…</div>
+            <button
+              v-for="r in linkSearchResults"
+              :key="r.id"
+              type="button"
+              :style="{
+                textAlign: 'left', border: '1px solid var(--color-navy)',
+                background: pickedItem?.id === r.id ? 'var(--color-navy)' : 'transparent',
+                color: pickedItem?.id === r.id ? 'var(--color-paper)' : 'var(--color-navy)',
+                cursor: 'pointer', padding: '7px 9px', fontSize: '12.5px',
+              }"
+              @click="pickItem(r)"
+            >
+              {{ r.name }} <span style="opacity: 0.6">({{ CATEGORY_LABELS[r.category] }})</span>
+            </button>
+          </div>
+          <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 5px">
+            <label style="font: 500 9.5px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.65)">RELATIONSHIP</label>
+            <input v-model="linkLabel" type="text" placeholder="e.g. FITS, CAME FROM, PLAN FOR THIS KIT" style="padding: 9px 11px; border: 1px solid var(--color-navy); background: var(--color-paper); font-size: 13.5px; color: var(--color-navy)" />
+          </div>
+          <div style="margin-top: 14px; display: flex; gap: 8px; align-items: center">
+            <button type="button" :disabled="linking" style="border: 0; cursor: pointer; background: var(--color-navy); color: var(--color-paper); padding: 9px 14px; font: 400 11px 'Archivo Black', sans-serif; letter-spacing: 0.08em" @click="submitLink">LINK</button>
+            <button type="button" style="border: 1px solid var(--color-navy); cursor: pointer; background: transparent; color: var(--color-navy); padding: 9px 14px; font: 600 10.5px 'Archivo', sans-serif; letter-spacing: 0.08em; text-transform: uppercase" @click="closeLinkPicker">Cancel</button>
+            <span v-if="linkError" style="color: var(--color-rust); font-size: 12px">{{ linkError }}</span>
+          </div>
+        </div>
+      </div>
+    </template>
   </main>
 </template>

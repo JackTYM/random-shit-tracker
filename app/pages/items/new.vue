@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CATEGORY_FORM_FIELDS, CATEGORY_LABELS } from '~/data/categoryFormFields';
+import { CATEGORY_LABELS, CATEGORY_FORM_FIELDS } from '~/data/categoryFormFields';
 
 const { createItem } = useCreateItem();
 const { uploadPhoto } = useUploadPhoto();
@@ -15,19 +15,18 @@ const stagedPhotos = ref<{ key: string; publicUrl: string; previewName: string }
 const uploading = ref(false);
 
 const selectedCategory = ref<string | null>(null);
-const categoryValues = reactive<Record<string, string>>({});
-const otherValues = reactive<Record<string, string>>({});
+const categoryValues = ref<Record<string, string>>({});
+const otherValues = ref<Record<string, string>>({});
 
 const error = ref('');
 const saving = ref(false);
 
 const categories = Object.keys(CATEGORY_LABELS);
-const currentFields = computed(() => (selectedCategory.value ? CATEGORY_FORM_FIELDS[selectedCategory.value] : []));
 
 function selectCategory(cat: string) {
   selectedCategory.value = cat;
-  Object.keys(categoryValues).forEach((k) => delete categoryValues[k]);
-  Object.keys(otherValues).forEach((k) => delete otherValues[k]);
+  categoryValues.value = {};
+  otherValues.value = {};
 }
 
 async function handleFileInput(e: Event) {
@@ -49,10 +48,10 @@ async function handleFileInput(e: Event) {
   }
 }
 
-function buildCategoryFieldPayload(): Record<string, unknown> {
+function buildCategoryFieldPayload(fields: { key: string; type: string; otherKey?: string }[]): Record<string, unknown> {
   const payload: Record<string, unknown> = {};
-  for (const field of currentFields.value) {
-    let value: unknown = categoryValues[field.key] ?? null;
+  for (const field of fields) {
+    let value: unknown = categoryValues.value[field.key] ?? null;
     if (field.type === 'number') {
       value = value === '' || value === null || value === undefined ? null : Number(value);
     } else if (value === '') {
@@ -60,7 +59,7 @@ function buildCategoryFieldPayload(): Record<string, unknown> {
     }
     payload[field.key] = value;
     if (field.otherKey) {
-      payload[field.otherKey] = value === 'Other' ? (otherValues[field.otherKey] || null) : null;
+      payload[field.otherKey] = value === 'Other' ? (otherValues.value[field.otherKey] || null) : null;
     }
   }
   return payload;
@@ -75,8 +74,8 @@ function resetForm() {
   notes.value = '';
   stagedPhotos.value = [];
   selectedCategory.value = null;
-  Object.keys(categoryValues).forEach((k) => delete categoryValues[k]);
-  Object.keys(otherValues).forEach((k) => delete otherValues[k]);
+  categoryValues.value = {};
+  otherValues.value = {};
 }
 
 async function save(andAddAnother: boolean) {
@@ -101,7 +100,7 @@ async function save(andAddAnother: boolean) {
         valueEstimatedAt: valueEstimatedAt.value || null,
         notes: notes.value || null,
       },
-      buildCategoryFieldPayload(),
+      buildCategoryFieldPayload(CATEGORY_FORM_FIELDS[selectedCategory.value] ?? []),
       stagedPhotos.value,
     );
 
@@ -205,44 +204,12 @@ async function save(andAddAnother: boolean) {
         <span style="background: var(--color-navy); color: var(--color-paper); width: 19px; height: 19px; display: flex; align-items: center; justify-content: center; font: 400 11px 'Archivo Black', sans-serif">3</span>
         <span style="font: 400 11px 'Archivo Black', sans-serif; letter-spacing: 0.12em">{{ CATEGORY_LABELS[selectedCategory].toUpperCase() }} DETAILS</span>
       </div>
-      <div style="padding: 18px 20px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px">
-        <div v-for="field in currentFields" :key="field.key" style="display: flex; flex-direction: column; gap: 5px">
-          <label style="font: 500 9.5px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.65)">{{ field.label.toUpperCase() }}</label>
-          <select
-            v-if="field.type === 'select'"
-            v-model="categoryValues[field.key]"
-            style="padding: 9px 11px; border: 1px solid var(--color-navy); background: var(--color-paper); font-size: 13.5px; color: var(--color-navy)"
-          >
-            <option value="" disabled>Select…</option>
-            <option v-for="opt in field.options" :key="opt" :value="opt">{{ opt }}</option>
-          </select>
-          <input
-            v-else-if="field.type === 'number'"
-            v-model="categoryValues[field.key]"
-            type="number"
-            step="any"
-            style="padding: 9px 11px; border: 1px solid var(--color-navy); background: var(--color-paper); font-size: 13.5px; color: var(--color-navy)"
-          />
-          <textarea
-            v-else-if="field.type === 'textarea'"
-            v-model="categoryValues[field.key]"
-            rows="3"
-            style="padding: 9px 11px; border: 1px solid var(--color-navy); background: var(--color-paper); font-size: 13.5px; color: var(--color-navy); resize: vertical"
-          />
-          <input
-            v-else
-            v-model="categoryValues[field.key]"
-            type="text"
-            style="padding: 9px 11px; border: 1px solid var(--color-navy); background: var(--color-paper); font-size: 13.5px; color: var(--color-navy)"
-          />
-          <input
-            v-if="field.otherKey && categoryValues[field.key] === 'Other'"
-            v-model="otherValues[field.otherKey]"
-            type="text"
-            placeholder="Specify…"
-            style="padding: 9px 11px; border: 1px dashed rgba(22,34,76,0.5); background: var(--color-paper); font-size: 13.5px; color: var(--color-navy)"
-          />
-        </div>
+      <div style="padding: 18px 20px">
+        <CategoryFieldsForm
+          :category="selectedCategory"
+          v-model:values="categoryValues"
+          v-model:other-values="otherValues"
+        />
       </div>
       <div style="border-top: 1px dashed rgba(22,34,76,0.35); padding: 14px 20px; display: flex; gap: 10px; align-items: center">
         <button

@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { CATEGORY_LABELS } from '~/data/categoryFormFields';
-import { CATEGORY_CARD_FIELDS } from '~/data/categoryCardFields';
 import type { ItemRecord } from '~/composables/useItems';
 
-const { listItems, categoryDetail } = useItems();
-const client = useNeonClient();
+const { listItems } = useItems();
+const { fetchPrimaryPhotos } = usePrimaryPhotos();
 
 const items = ref<ItemRecord[]>([]);
 const loading = ref(true);
@@ -22,21 +21,10 @@ async function load() {
     return;
   }
 
-  const ids = items.value.map((i) => i.id);
-  if (ids.length > 0) {
-    try {
-      const { data, error } = await client
-        .from('item_photos')
-        .select('item_id, url')
-        .in('item_id', ids)
-        .eq('is_primary', true);
-      if (error) throw error;
-      const map: Record<string, string> = {};
-      for (const row of data ?? []) map[row.item_id] = row.url;
-      primaryPhotoByItem.value = map;
-    } catch {
-      primaryPhotoByItem.value = {};
-    }
+  try {
+    primaryPhotoByItem.value = await fetchPrimaryPhotos(items.value.map((i) => i.id));
+  } catch {
+    primaryPhotoByItem.value = {};
   }
 
   loading.value = false;
@@ -111,15 +99,6 @@ function clearFilters() {
   selectedCategories.value = new Set();
   selectedManufacturers.value = new Set();
   selectedStorages.value = new Set();
-}
-
-function cardSpecs(it: ItemRecord): { k: string; v: string }[] {
-  const detail = categoryDetail(it);
-  if (!detail) return [];
-  const fields = CATEGORY_CARD_FIELDS[it.category] ?? [];
-  return fields
-    .map((f) => ({ k: f.label, v: detail[f.key] }))
-    .filter((s) => s.v !== null && s.v !== undefined && s.v !== '');
 }
 </script>
 
@@ -221,37 +200,13 @@ function cardSpecs(it: ItemRecord): { k: string; v: string }[] {
       <div v-if="loading" style="font: 500 12px 'JetBrains Mono', monospace; color: rgba(22,34,76,0.6)">Loading…</div>
       <p v-else-if="loadError" style="color: var(--color-rust)">{{ loadError }}</p>
       <div v-else style="display: grid; grid-template-columns: repeat(auto-fill, minmax(236px, 1fr)); gap: 16px">
-        <div
+        <ItemCard
           v-for="it in filteredItems"
           :key="it.id"
-          style="background: #fff; border: 1px solid var(--color-navy); cursor: pointer; display: flex; flex-direction: column"
+          :item="it"
+          :photo-url="primaryPhotoByItem[it.id] ?? null"
           @click="navigateTo(`/items/${it.id}`)"
-        >
-          <div style="position: relative; height: 168px; border-bottom: 1px solid var(--color-navy); overflow: hidden; background: var(--color-paper)">
-            <img v-if="primaryPhotoByItem[it.id]" :src="primaryPhotoByItem[it.id]" :alt="it.name" style="width: 100%; height: 100%; object-fit: cover; display: block" />
-            <div v-else style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: repeating-linear-gradient(135deg, #EAE4D5 0 6px, var(--color-paper) 6px 12px)">
-              <span style="font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.1em; color: rgba(22,34,76,0.5); text-align: center; padding: 0 12px">NO PHOTO</span>
-            </div>
-            <span style="position: absolute; top: 0; left: 0; background: var(--color-orange); color: var(--color-navy); font: 700 9px 'JetBrains Mono', monospace; letter-spacing: 0.1em; padding: 5px 8px">{{ CATEGORY_LABELS[it.category]?.toUpperCase() }}</span>
-          </div>
-          <div style="padding: 12px 14px 13px; display: flex; flex-direction: column; gap: 9px; flex: 1">
-            <div>
-              <div style="font: 400 14px 'Archivo Black', sans-serif; line-height: 1.2; text-transform: uppercase">{{ it.name }}</div>
-              <div style="font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.08em; color: rgba(22,34,76,0.6); margin-top: 4px">{{ it.manufacturer_or_club }}</div>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 3px; flex: 1">
-              <div v-for="sp in cardSpecs(it)" :key="sp.k" style="display: flex; align-items: baseline; gap: 5px; font: 400 11px 'JetBrains Mono', monospace; color: rgba(22,34,76,0.75)">
-                <span>{{ sp.k }}</span>
-                <span style="flex: 1; border-bottom: 1px dotted rgba(22,34,76,0.4); transform: translateY(-3px)" />
-                <span style="font-weight: 700; color: var(--color-navy)">{{ sp.v }}</span>
-              </div>
-            </div>
-            <div style="border-top: 1px dashed rgba(22,34,76,0.3); padding-top: 9px; display: flex; align-items: center; justify-content: space-between">
-              <span style="font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.06em; color: var(--color-navy)">▪ {{ it.storage_location || '—' }}</span>
-              <span v-if="it.approx_value_usd" style="font: 400 14px 'Archivo Black', sans-serif; color: var(--color-rust)">${{ Number(it.approx_value_usd).toFixed(0) }}</span>
-            </div>
-          </div>
-        </div>
+        />
       </div>
       <div v-if="!loading && !loadError && filteredItems.length === 0" style="border: 1px dashed rgba(22,34,76,0.4); padding: 48px; text-align: center; font: 500 12px 'JetBrains Mono', monospace; letter-spacing: 0.08em; color: rgba(22,34,76,0.6)">
         NO ITEMS MATCH THESE FILTERS

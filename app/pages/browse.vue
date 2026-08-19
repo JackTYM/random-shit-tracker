@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { CATEGORY_LABELS } from '~/data/categoryFormFields';
 import { CATEGORY_CARD_FIELDS } from '~/data/categoryCardFields';
+import type { ItemRecord } from '~/composables/useItems';
 
 const { listItems, categoryDetail } = useItems();
 const client = useNeonClient();
 
-const items = ref<any[]>([]);
+const items = ref<ItemRecord[]>([]);
 const loading = ref(true);
 const loadError = ref('');
 const primaryPhotoByItem = ref<Record<string, string>>({});
@@ -15,8 +16,15 @@ async function load() {
   loadError.value = '';
   try {
     items.value = await listItems();
-    const ids = items.value.map((i) => i.id);
-    if (ids.length > 0) {
+  } catch (e: any) {
+    loadError.value = e?.message ?? 'Failed to load items.';
+    loading.value = false;
+    return;
+  }
+
+  const ids = items.value.map((i) => i.id);
+  if (ids.length > 0) {
+    try {
       const { data, error } = await client
         .from('item_photos')
         .select('item_id, url')
@@ -24,14 +32,14 @@ async function load() {
         .eq('is_primary', true);
       if (error) throw error;
       const map: Record<string, string> = {};
-      for (const row of data ?? []) map[(row as any).item_id] = (row as any).url;
+      for (const row of data ?? []) map[row.item_id] = row.url;
       primaryPhotoByItem.value = map;
+    } catch {
+      primaryPhotoByItem.value = {};
     }
-  } catch (e: any) {
-    loadError.value = e?.message ?? 'Failed to load items.';
-  } finally {
-    loading.value = false;
   }
+
+  loading.value = false;
 }
 
 onMounted(load);
@@ -105,7 +113,7 @@ function clearFilters() {
   selectedStorages.value = new Set();
 }
 
-function cardSpecs(it: any): { k: string; v: string }[] {
+function cardSpecs(it: ItemRecord): { k: string; v: string }[] {
   const detail = categoryDetail(it);
   if (!detail) return [];
   const fields = CATEGORY_CARD_FIELDS[it.category] ?? [];

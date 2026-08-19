@@ -3,6 +3,7 @@ export interface CardField {
   label: string;
 }
 
+// Keys here match raw item-record column names (unlike categoryFormFields.ts's p_-prefixed RPC params).
 export const CATEGORY_CARD_FIELDS: Record<string, CardField[]> = {
   motor: [
     { key: 'designation', label: 'DESIGNATION' },
@@ -17,7 +18,7 @@ export const CATEGORY_CARD_FIELDS: Record<string, CardField[]> = {
     { key: 'model_type', label: 'TYPE' },
   ],
   part: [
-    { key: 'part_number', label: 'PART #' },
+    { key: 'part_category', label: 'CATEGORY' },
     { key: 'material', label: 'MATERIAL' },
   ],
   print: [

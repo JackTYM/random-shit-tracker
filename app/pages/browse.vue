@@ -34,11 +34,11 @@ onMounted(load);
 
 const route = useRoute();
 
-const selectedCategories = ref<Set<string>>(
-  typeof route.query.category === 'string' && route.query.category in CATEGORY_LABELS
-    ? new Set([route.query.category])
-    : new Set()
-);
+function deriveSelectedCategories(category: unknown): Set<string> {
+  return typeof category === 'string' && category in CATEGORY_LABELS ? new Set([category]) : new Set();
+}
+
+const selectedCategories = ref<Set<string>>(deriveSelectedCategories(route.query.category));
 const selectedManufacturers = ref<Set<string>>(new Set());
 const selectedStorages = ref<Set<string>>(new Set());
 const missingValueOnly = ref(route.query.missingValue === 'true');
@@ -47,10 +47,7 @@ const sortBy = ref<'newest' | 'name' | 'value'>('newest');
 watch(
   () => route.query,
   (query) => {
-    selectedCategories.value =
-      typeof query.category === 'string' && query.category in CATEGORY_LABELS
-        ? new Set([query.category])
-        : new Set();
+    selectedCategories.value = deriveSelectedCategories(query.category);
     missingValueOnly.value = query.missingValue === 'true';
   }
 );

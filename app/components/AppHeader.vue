@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { CATEGORY_LABELS } from '~/data/categoryFormFields';
+import type { HeaderSearchResult } from '~/composables/useSearchItems';
 
 const { session, signOut } = useAuth();
 const { searchItems } = useSearchItems();
@@ -22,7 +23,7 @@ async function handleSignOut() {
 }
 
 const searchQuery = ref('');
-const searchResults = ref<{ id: string; name: string; category: string }[]>([]);
+const searchResults = ref<HeaderSearchResult[]>([]);
 const searchOpen = ref(false);
 let searchDebounce: ReturnType<typeof setTimeout> | null = null;
 

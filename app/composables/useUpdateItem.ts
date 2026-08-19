@@ -1,11 +1,6 @@
-export interface UpdateSharedFields {
-  name: string;
-  manufacturerOrClub: string | null;
-  storageLocation: string | null;
-  approxValueUsd: number | null;
-  valueEstimatedAt: string | null;
-  notes: string | null;
-}
+import type { SharedItemFields } from './useCreateItem';
+
+export type UpdateSharedFields = SharedItemFields;
 
 const CATEGORY_TABLE: Record<string, string> = {
   motor: 'rocket_motors',
@@ -25,6 +20,9 @@ export function useUpdateItem() {
     shared: UpdateSharedFields,
     categoryFields: Record<string, unknown>,
   ): Promise<void> {
+    const table = CATEGORY_TABLE[category];
+    if (!table) throw new Error(`Unknown category: ${category}`);
+
     const { error: itemsError } = await client
       .from('items')
       .update({
@@ -38,9 +36,6 @@ export function useUpdateItem() {
       })
       .eq('id', itemId);
     if (itemsError) throw itemsError;
-
-    const table = CATEGORY_TABLE[category];
-    if (!table) throw new Error(`Unknown category: ${category}`);
 
     // categoryFields keys are p_-prefixed (matching categoryFormFields.ts / the RPC
     // parameter convention from Phase 2a) — strip the prefix to get the real column name.

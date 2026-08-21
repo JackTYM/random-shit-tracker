@@ -29,6 +29,13 @@
       "when": 1787288386534,
       "tag": "0003_add_storage_note_reference_code",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1787288607110,
+      "tag": "0004_reference_code_generation",
+      "breakpoints": true
     }
   ]
 }

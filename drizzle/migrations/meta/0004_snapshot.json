@@ -1,0 +1,1157 @@
+{
+  "id": "b8bcc763-740f-431d-b6c1-23de805b4f7d",
+  "prevId": "7bfac173-7e39-4c16-a091-d656bfc8b0b6",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.items": {
+      "name": "items",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "(auth.user_id())::uuid"
+        },
+        "category": {
+          "name": "category",
+          "type": "category",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "manufacturer_or_club": {
+          "name": "manufacturer_or_club",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "storage_location": {
+          "name": "storage_location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "storage_note": {
+          "name": "storage_note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reference_code": {
+          "name": "reference_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approx_value_usd": {
+          "name": "approx_value_usd",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "value_estimated_at": {
+          "name": "value_estimated_at",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "crud-authenticated-policy-select": {
+          "name": "crud-authenticated-policy-select",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select (auth.user_id())::uuid = \"items\".\"owner_id\")"
+        },
+        "crud-authenticated-policy-insert": {
+          "name": "crud-authenticated-policy-insert",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "(select (auth.user_id())::uuid = \"items\".\"owner_id\")"
+        },
+        "crud-authenticated-policy-update": {
+          "name": "crud-authenticated-policy-update",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select (auth.user_id())::uuid = \"items\".\"owner_id\")",
+          "withCheck": "(select (auth.user_id())::uuid = \"items\".\"owner_id\")"
+        },
+        "crud-authenticated-policy-delete": {
+          "name": "crud-authenticated-policy-delete",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select (auth.user_id())::uuid = \"items\".\"owner_id\")"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.model_airplanes": {
+      "name": "model_airplanes",
+      "schema": "",
+      "columns": {
+        "item_id": {
+          "name": "item_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "(auth.user_id())::uuid"
+        },
+        "wingspan": {
+          "name": "wingspan",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "model_type": {
+          "name": "model_type",
+          "type": "airplane_model_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "model_subtype": {
+          "name": "model_subtype",
+          "type": "airplane_model_subtype",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "model_subtype_other": {
+          "name": "model_subtype_other",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "model_airplanes_item_id_items_id_fk": {
+          "name": "model_airplanes_item_id_items_id_fk",
+          "tableFrom": "model_airplanes",
+          "columnsFrom": [
+            "item_id"
+          ],
+          "tableTo": "items",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "crud-authenticated-policy-select": {
+          "name": "crud-authenticated-policy-select",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select (auth.user_id())::uuid = \"model_airplanes\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"model_airplanes\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        },
+        "crud-authenticated-policy-insert": {
+          "name": "crud-authenticated-policy-insert",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "(select (auth.user_id())::uuid = \"model_airplanes\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"model_airplanes\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        },
+        "crud-authenticated-policy-update": {
+          "name": "crud-authenticated-policy-update",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select (auth.user_id())::uuid = \"model_airplanes\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"model_airplanes\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)",
+          "withCheck": "(select (auth.user_id())::uuid = \"model_airplanes\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"model_airplanes\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        },
+        "crud-authenticated-policy-delete": {
+          "name": "crud-authenticated-policy-delete",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select (auth.user_id())::uuid = \"model_airplanes\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"model_airplanes\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.model_rocket_kits": {
+      "name": "model_rocket_kits",
+      "schema": "",
+      "columns": {
+        "item_id": {
+          "name": "item_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "(auth.user_id())::uuid"
+        },
+        "motor_diameter_mm": {
+          "name": "motor_diameter_mm",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "diameter_in": {
+          "name": "diameter_in",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "length_in": {
+          "name": "length_in",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "model_rocket_kits_item_id_items_id_fk": {
+          "name": "model_rocket_kits_item_id_items_id_fk",
+          "tableFrom": "model_rocket_kits",
+          "columnsFrom": [
+            "item_id"
+          ],
+          "tableTo": "items",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "crud-authenticated-policy-select": {
+          "name": "crud-authenticated-policy-select",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select (auth.user_id())::uuid = \"model_rocket_kits\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"model_rocket_kits\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        },
+        "crud-authenticated-policy-insert": {
+          "name": "crud-authenticated-policy-insert",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "(select (auth.user_id())::uuid = \"model_rocket_kits\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"model_rocket_kits\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        },
+        "crud-authenticated-policy-update": {
+          "name": "crud-authenticated-policy-update",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select (auth.user_id())::uuid = \"model_rocket_kits\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"model_rocket_kits\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)",
+          "withCheck": "(select (auth.user_id())::uuid = \"model_rocket_kits\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"model_rocket_kits\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        },
+        "crud-authenticated-policy-delete": {
+          "name": "crud-authenticated-policy-delete",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select (auth.user_id())::uuid = \"model_rocket_kits\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"model_rocket_kits\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.model_rocket_parts": {
+      "name": "model_rocket_parts",
+      "schema": "",
+      "columns": {
+        "item_id": {
+          "name": "item_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "(auth.user_id())::uuid"
+        },
+        "part_category": {
+          "name": "part_category",
+          "type": "part_category",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "part_category_other": {
+          "name": "part_category_other",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "part_number": {
+          "name": "part_number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "material": {
+          "name": "material",
+          "type": "part_material",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "material_other": {
+          "name": "material_other",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "diameter": {
+          "name": "diameter",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "origin": {
+          "name": "origin",
+          "type": "part_origin",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "model_rocket_parts_item_id_items_id_fk": {
+          "name": "model_rocket_parts_item_id_items_id_fk",
+          "tableFrom": "model_rocket_parts",
+          "columnsFrom": [
+            "item_id"
+          ],
+          "tableTo": "items",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "crud-authenticated-policy-select": {
+          "name": "crud-authenticated-policy-select",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select (auth.user_id())::uuid = \"model_rocket_parts\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"model_rocket_parts\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        },
+        "crud-authenticated-policy-insert": {
+          "name": "crud-authenticated-policy-insert",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "(select (auth.user_id())::uuid = \"model_rocket_parts\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"model_rocket_parts\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        },
+        "crud-authenticated-policy-update": {
+          "name": "crud-authenticated-policy-update",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select (auth.user_id())::uuid = \"model_rocket_parts\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"model_rocket_parts\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)",
+          "withCheck": "(select (auth.user_id())::uuid = \"model_rocket_parts\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"model_rocket_parts\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        },
+        "crud-authenticated-policy-delete": {
+          "name": "crud-authenticated-policy-delete",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select (auth.user_id())::uuid = \"model_rocket_parts\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"model_rocket_parts\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.other_collectables": {
+      "name": "other_collectables",
+      "schema": "",
+      "columns": {
+        "item_id": {
+          "name": "item_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "(auth.user_id())::uuid"
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "other_collectables_item_id_items_id_fk": {
+          "name": "other_collectables_item_id_items_id_fk",
+          "tableFrom": "other_collectables",
+          "columnsFrom": [
+            "item_id"
+          ],
+          "tableTo": "items",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "crud-authenticated-policy-select": {
+          "name": "crud-authenticated-policy-select",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select (auth.user_id())::uuid = \"other_collectables\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"other_collectables\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        },
+        "crud-authenticated-policy-insert": {
+          "name": "crud-authenticated-policy-insert",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "(select (auth.user_id())::uuid = \"other_collectables\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"other_collectables\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        },
+        "crud-authenticated-policy-update": {
+          "name": "crud-authenticated-policy-update",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select (auth.user_id())::uuid = \"other_collectables\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"other_collectables\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)",
+          "withCheck": "(select (auth.user_id())::uuid = \"other_collectables\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"other_collectables\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        },
+        "crud-authenticated-policy-delete": {
+          "name": "crud-authenticated-policy-delete",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select (auth.user_id())::uuid = \"other_collectables\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"other_collectables\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.printed_materials": {
+      "name": "printed_materials",
+      "schema": "",
+      "columns": {
+        "item_id": {
+          "name": "item_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "(auth.user_id())::uuid"
+        },
+        "print_category": {
+          "name": "print_category",
+          "type": "print_category",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "year": {
+          "name": "year",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "volume_or_issue": {
+          "name": "volume_or_issue",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "kit_number": {
+          "name": "kit_number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "printed_materials_item_id_items_id_fk": {
+          "name": "printed_materials_item_id_items_id_fk",
+          "tableFrom": "printed_materials",
+          "columnsFrom": [
+            "item_id"
+          ],
+          "tableTo": "items",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "crud-authenticated-policy-select": {
+          "name": "crud-authenticated-policy-select",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select (auth.user_id())::uuid = \"printed_materials\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"printed_materials\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        },
+        "crud-authenticated-policy-insert": {
+          "name": "crud-authenticated-policy-insert",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "(select (auth.user_id())::uuid = \"printed_materials\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"printed_materials\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        },
+        "crud-authenticated-policy-update": {
+          "name": "crud-authenticated-policy-update",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select (auth.user_id())::uuid = \"printed_materials\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"printed_materials\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)",
+          "withCheck": "(select (auth.user_id())::uuid = \"printed_materials\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"printed_materials\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        },
+        "crud-authenticated-policy-delete": {
+          "name": "crud-authenticated-policy-delete",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select (auth.user_id())::uuid = \"printed_materials\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"printed_materials\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.rocket_motors": {
+      "name": "rocket_motors",
+      "schema": "",
+      "columns": {
+        "item_id": {
+          "name": "item_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "(auth.user_id())::uuid"
+        },
+        "impulse_class": {
+          "name": "impulse_class",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "designation": {
+          "name": "designation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "diameter_mm": {
+          "name": "diameter_mm",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "construction": {
+          "name": "construction",
+          "type": "motor_construction",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "certification_status": {
+          "name": "certification_status",
+          "type": "motor_certification_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "quantity": {
+          "name": "quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "propellant_type": {
+          "name": "propellant_type",
+          "type": "motor_propellant_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "rocket_motors_item_id_items_id_fk": {
+          "name": "rocket_motors_item_id_items_id_fk",
+          "tableFrom": "rocket_motors",
+          "columnsFrom": [
+            "item_id"
+          ],
+          "tableTo": "items",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "crud-authenticated-policy-select": {
+          "name": "crud-authenticated-policy-select",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select (auth.user_id())::uuid = \"rocket_motors\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"rocket_motors\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        },
+        "crud-authenticated-policy-insert": {
+          "name": "crud-authenticated-policy-insert",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "(select (auth.user_id())::uuid = \"rocket_motors\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"rocket_motors\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        },
+        "crud-authenticated-policy-update": {
+          "name": "crud-authenticated-policy-update",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select (auth.user_id())::uuid = \"rocket_motors\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"rocket_motors\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)",
+          "withCheck": "(select (auth.user_id())::uuid = \"rocket_motors\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"rocket_motors\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        },
+        "crud-authenticated-policy-delete": {
+          "name": "crud-authenticated-policy-delete",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select (auth.user_id())::uuid = \"rocket_motors\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"rocket_motors\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.item_links": {
+      "name": "item_links",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "item_id": {
+          "name": "item_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "(auth.user_id())::uuid"
+        },
+        "related_item_id": {
+          "name": "related_item_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "relationship_label": {
+          "name": "relationship_label",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "item_links_item_id_idx": {
+          "name": "item_links_item_id_idx",
+          "columns": [
+            {
+              "expression": "item_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "item_links_related_item_id_idx": {
+          "name": "item_links_related_item_id_idx",
+          "columns": [
+            {
+              "expression": "related_item_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "item_links_item_id_items_id_fk": {
+          "name": "item_links_item_id_items_id_fk",
+          "tableFrom": "item_links",
+          "columnsFrom": [
+            "item_id"
+          ],
+          "tableTo": "items",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        },
+        "item_links_related_item_id_items_id_fk": {
+          "name": "item_links_related_item_id_items_id_fk",
+          "tableFrom": "item_links",
+          "columnsFrom": [
+            "related_item_id"
+          ],
+          "tableTo": "items",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "crud-authenticated-policy-select": {
+          "name": "crud-authenticated-policy-select",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select (auth.user_id())::uuid = \"item_links\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"item_links\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n) AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"item_links\".\"related_item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        },
+        "crud-authenticated-policy-insert": {
+          "name": "crud-authenticated-policy-insert",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "(select (auth.user_id())::uuid = \"item_links\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"item_links\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n) AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"item_links\".\"related_item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        },
+        "crud-authenticated-policy-update": {
+          "name": "crud-authenticated-policy-update",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select (auth.user_id())::uuid = \"item_links\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"item_links\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n) AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"item_links\".\"related_item_id\" AND items.owner_id = (auth.user_id())::uuid\n)",
+          "withCheck": "(select (auth.user_id())::uuid = \"item_links\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"item_links\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n) AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"item_links\".\"related_item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        },
+        "crud-authenticated-policy-delete": {
+          "name": "crud-authenticated-policy-delete",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select (auth.user_id())::uuid = \"item_links\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"item_links\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n) AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"item_links\".\"related_item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.item_photos": {
+      "name": "item_photos",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "item_id": {
+          "name": "item_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "(auth.user_id())::uuid"
+        },
+        "r2_key": {
+          "name": "r2_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "url": {
+          "name": "url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sort_order": {
+          "name": "sort_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "is_primary": {
+          "name": "is_primary",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {
+        "item_photos_item_id_idx": {
+          "name": "item_photos_item_id_idx",
+          "columns": [
+            {
+              "expression": "item_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "item_photos_item_id_items_id_fk": {
+          "name": "item_photos_item_id_items_id_fk",
+          "tableFrom": "item_photos",
+          "columnsFrom": [
+            "item_id"
+          ],
+          "tableTo": "items",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "crud-authenticated-policy-select": {
+          "name": "crud-authenticated-policy-select",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select (auth.user_id())::uuid = \"item_photos\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"item_photos\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        },
+        "crud-authenticated-policy-insert": {
+          "name": "crud-authenticated-policy-insert",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "(select (auth.user_id())::uuid = \"item_photos\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"item_photos\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        },
+        "crud-authenticated-policy-update": {
+          "name": "crud-authenticated-policy-update",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select (auth.user_id())::uuid = \"item_photos\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"item_photos\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)",
+          "withCheck": "(select (auth.user_id())::uuid = \"item_photos\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"item_photos\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        },
+        "crud-authenticated-policy-delete": {
+          "name": "crud-authenticated-policy-delete",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select (auth.user_id())::uuid = \"item_photos\".\"owner_id\") AND EXISTS (\n  SELECT 1 FROM items WHERE items.id = \"item_photos\".\"item_id\" AND items.owner_id = (auth.user_id())::uuid\n)"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.category": {
+      "name": "category",
+      "schema": "public",
+      "values": [
+        "motor",
+        "kit",
+        "plane",
+        "part",
+        "print",
+        "other"
+      ]
+    },
+    "public.airplane_model_subtype": {
+      "name": "airplane_model_subtype",
+      "schema": "public",
+      "values": [
+        "Rubber",
+        "Glider",
+        "Electric",
+        "Gas",
+        "Other"
+      ]
+    },
+    "public.airplane_model_type": {
+      "name": "airplane_model_type",
+      "schema": "public",
+      "values": [
+        "FF",
+        "CL",
+        "RC"
+      ]
+    },
+    "public.motor_certification_status": {
+      "name": "motor_certification_status",
+      "schema": "public",
+      "values": [
+        "Certified",
+        "Collectable",
+        "Out of Certification"
+      ]
+    },
+    "public.motor_construction": {
+      "name": "motor_construction",
+      "schema": "public",
+      "values": [
+        "Single-Use",
+        "Reloadable"
+      ]
+    },
+    "public.motor_propellant_type": {
+      "name": "motor_propellant_type",
+      "schema": "public",
+      "values": [
+        "BP",
+        "Composite"
+      ]
+    },
+    "public.part_category": {
+      "name": "part_category",
+      "schema": "public",
+      "values": [
+        "Nose Cone",
+        "Fin Unit",
+        "Transition",
+        "Coupler",
+        "Centering Ring",
+        "Nose Block",
+        "Body Tube",
+        "Parachute",
+        "Other"
+      ]
+    },
+    "public.part_material": {
+      "name": "part_material",
+      "schema": "public",
+      "values": [
+        "Plastic",
+        "Balsa",
+        "Other"
+      ]
+    },
+    "public.part_origin": {
+      "name": "part_origin",
+      "schema": "public",
+      "values": [
+        "Manufacturer's Part",
+        "Custom"
+      ]
+    },
+    "public.print_category": {
+      "name": "print_category",
+      "schema": "public",
+      "values": [
+        "Book",
+        "Catalogue",
+        "Newsletter",
+        "Model Plan",
+        "Educational Material",
+        "Scale Data",
+        "Advertising Material"
+      ]
+    }
+  },
+  "schemas": {},
+  "views": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

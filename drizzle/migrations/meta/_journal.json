@@ -57,6 +57,34 @@
       "when": 1787290416816,
       "tag": "0007_backfill_reference_codes",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1787292522741,
+      "tag": "0008_grant_auth_schema_usage",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1787295754548,
+      "tag": "0009_current_owner_id_wrapper",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1787295801028,
+      "tag": "0010_repoint_owner_default_to_wrapper",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1787295863315,
+      "tag": "0011_rpc_functions_use_owner_wrapper",
+      "breakpoints": true
     }
   ]
 }

@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm';
 
-export const ownerDefault = sql`(auth.user_id())::uuid`;
+export const ownerDefault = sql`public.current_owner_id()`;
 
 // auth.user_id() returns text; owner_id columns are uuid. Postgres does not
 // implicitly cast text to uuid for equality, so the cast must be explicit

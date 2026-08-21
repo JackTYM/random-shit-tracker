@@ -44,6 +44,11 @@ async function loadItem() {
 
 const primaryPhoto = computed(() => photos.value.find((p) => p.is_primary) ?? photos.value[0] ?? null);
 
+const itemSubline = computed(() => {
+  const parts = [item.value?.manufacturer_or_club, item.value?.reference_code].filter(Boolean);
+  return parts.join(' · ');
+});
+
 const detailFields = computed(() => {
   if (!item.value) return [];
   const detail = categoryDetail(item.value);
@@ -367,7 +372,7 @@ onMounted(async () => {
       <div>
         <span style="display: inline-block; background: var(--color-orange); color: var(--color-navy); font: 700 9.5px 'JetBrains Mono', monospace; letter-spacing: 0.12em; padding: 5px 9px">{{ CATEGORY_LABELS[item.category]?.toUpperCase() }}</span>
         <h1 style="margin: 12px 0 4px; font: 400 44px 'Archivo Black', sans-serif; line-height: 0.98; letter-spacing: -0.02em; text-transform: uppercase">{{ item.name }}</h1>
-        <div style="font: 500 12px 'JetBrains Mono', monospace; letter-spacing: 0.1em; color: rgba(22,34,76,0.7)">{{ item.manufacturer_or_club }}</div>
+        <div style="font: 500 12px 'JetBrains Mono', monospace; letter-spacing: 0.1em; color: rgba(22,34,76,0.7)">{{ itemSubline }}</div>
 
         <div v-if="!editing" style="display: flex; gap: 8px; margin-top: 18px">
           <button type="button" style="border: 0; cursor: pointer; background: var(--color-navy); color: var(--color-paper); padding: 10px 15px; font: 400 11px 'Archivo Black', sans-serif; letter-spacing: 0.08em" @click="startEdit">EDIT ENTRY</button>

@@ -86,7 +86,7 @@ const impulseBars = computed(() => {
   for (const it of motorItems) {
     const cls = String(categoryDetail(it)?.impulse_class ?? '').trim().toUpperCase();
     if (!cls) continue;
-    counts.set(cls, (counts.get(cls) ?? 0) + 1);
+    counts.set(cls, (counts.get(cls) ?? 0) + Number(categoryDetail(it)?.quantity ?? 0));
   }
   const known = IMPULSE_LADDER.filter((cls) => counts.has(cls));
   const unknown = [...counts.keys()].filter((cls) => !IMPULSE_LADDER.includes(cls)).sort();

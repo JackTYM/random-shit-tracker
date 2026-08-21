@@ -7,6 +7,7 @@ const { uploadPhoto } = useUploadPhoto();
 const name = ref('');
 const manufacturerOrClub = ref('');
 const storageLocation = ref('');
+const storageNote = ref('');
 const approxValueUsd = ref('');
 const valueEstimatedAt = ref('');
 const notes = ref('');
@@ -78,6 +79,7 @@ function resetForm() {
   name.value = '';
   manufacturerOrClub.value = '';
   storageLocation.value = '';
+  storageNote.value = '';
   approxValueUsd.value = '';
   valueEstimatedAt.value = '';
   notes.value = '';
@@ -105,6 +107,7 @@ async function save(andAddAnother: boolean) {
         name: name.value.trim(),
         manufacturerOrClub: manufacturerOrClub.value || null,
         storageLocation: storageLocation.value || null,
+        storageNote: storageNote.value || null,
         approxValueUsd: approxValueUsd.value ? Number(approxValueUsd.value) : null,
         valueEstimatedAt: valueEstimatedAt.value || null,
         notes: notes.value || null,
@@ -153,6 +156,10 @@ async function save(andAddAnother: boolean) {
         <div style="display: flex; flex-direction: column; gap: 5px">
           <label style="font: 500 9.5px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.65)">STORAGE LOCATION</label>
           <input v-model="storageLocation" placeholder="SHELF A · BIN 03" style="padding: 9px 11px; border: 1px solid var(--color-navy); background: var(--color-paper); font-size: 13.5px; color: var(--color-navy)" />
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 5px">
+          <label style="font: 500 9.5px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.65)">STORAGE NOTE</label>
+          <input v-model="storageNote" placeholder="e.g. Workshop, upper shelf" style="padding: 9px 11px; border: 1px solid var(--color-navy); background: var(--color-paper); font-size: 13.5px; color: var(--color-navy)" />
         </div>
         <div style="display: flex; flex-direction: column; gap: 5px">
           <label style="font: 500 9.5px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.65)">APPROX. VALUE (USD)</label>

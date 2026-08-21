@@ -1,9 +1,11 @@
 export const STALE_MONTHS = 12;
 
 export function monthsSince(dateStr: string): number {
-  const then = new Date(dateStr);
+  const parts = dateStr.split('-').map(Number);
+  const year = parts[0]!;
+  const month = parts[1]!;
   const now = new Date();
-  return (now.getFullYear() - then.getFullYear()) * 12 + (now.getMonth() - then.getMonth());
+  return (now.getFullYear() - year) * 12 + (now.getMonth() - (month - 1));
 }
 
 export function formatItemDetailAge(dateStr: string): string {

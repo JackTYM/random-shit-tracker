@@ -1,16 +1,18 @@
 <script setup lang="ts">
+import { CATEGORY_LABELS } from '~/data/categoryFormFields';
 import type { ItemRecord } from '~/composables/useItems';
 
 const { listItems } = useItems();
 const { fetchPrimaryPhotos } = usePrimaryPhotos();
+const route = useRoute();
 
 const UNASSIGNED = '__UNASSIGNED__';
+const UNASSIGNED_PARAM = 'unassigned';
 
 const items = ref<ItemRecord[]>([]);
 const loading = ref(true);
 const loadError = ref('');
 const primaryPhotoByItem = ref<Record<string, string>>({});
-const selectedLocation = ref<string | null>(null);
 
 async function load() {
   loading.value = true;
@@ -29,25 +31,43 @@ async function load() {
     primaryPhotoByItem.value = {};
   }
 
-  const locations = new Set(items.value.map((it) => it.storage_location ?? UNASSIGNED));
-  const named = Array.from(locations).filter((l) => l !== UNASSIGNED).sort();
-  selectedLocation.value = named.length > 0 ? named[0] : (locations.has(UNASSIGNED) ? UNASSIGNED : null);
-
   loading.value = false;
 }
 
 onMounted(load);
 
-const locationOptions = computed(() => {
-  const counts: Record<string, number> = {};
+const selectedLocation = computed(() => {
+  const raw = route.query.location;
+  if (!raw || typeof raw !== 'string') return null;
+  return raw === UNASSIGNED_PARAM ? UNASSIGNED : raw;
+});
+
+function binHref(key: string): string {
+  const param = key === UNASSIGNED ? UNASSIGNED_PARAM : key;
+  return `/storage?location=${encodeURIComponent(param)}`;
+}
+
+const bins = computed(() => {
+  const groups = new Map<string, ItemRecord[]>();
   for (const it of items.value) {
     const key = it.storage_location ?? UNASSIGNED;
-    counts[key] = (counts[key] ?? 0) + 1;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(it);
   }
-  const named = Object.keys(counts).filter((k) => k !== UNASSIGNED).sort();
-  const result = named.map((k) => ({ value: k, label: k, count: counts[k] }));
-  if (counts[UNASSIGNED]) result.push({ value: UNASSIGNED, label: 'UNASSIGNED', count: counts[UNASSIGNED] });
-  return result;
+  const named = Array.from(groups.keys()).filter((k) => k !== UNASSIGNED).sort();
+  const keys = groups.has(UNASSIGNED) ? [...named, UNASSIGNED] : named;
+  return keys.map((key) => {
+    const binItems = groups.get(key)!;
+    const sorted = [...binItems].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+    const tags = Array.from(new Set(binItems.map((it) => CATEGORY_LABELS[it.category]?.toUpperCase() ?? it.category.toUpperCase())));
+    return {
+      key,
+      label: key === UNASSIGNED ? 'Unassigned' : key,
+      count: binItems.length,
+      sample: sorted.slice(0, 3).map((it) => it.name),
+      tags,
+    };
+  });
 });
 
 const selectedItems = computed(() => {
@@ -67,45 +87,49 @@ const selectedLabel = computed(() => (selectedLocation.value === UNASSIGNED ? 'U
       ADD YOUR FIRST ITEM TO SEE IT HERE
     </div>
 
-    <div v-else style="display: flex; gap: 24px; align-items: flex-start">
-      <aside style="width: 236px; flex: none; position: sticky; top: 86px">
-        <div style="background: var(--color-navy); color: var(--color-paper); padding: 9px 12px; font: 400 11px 'Archivo Black', sans-serif; letter-spacing: 0.1em">LOCATIONS</div>
-        <div style="background: #fff; border: 1px solid var(--color-navy); border-top: 0">
-          <button
-            v-for="opt in locationOptions"
-            :key="opt.value"
-            type="button"
-            :style="{
-              display: 'flex', justifyContent: 'space-between', width: '100%', textAlign: 'left', border: 0,
-              borderBottom: '1px solid rgba(22,34,76,0.15)',
-              background: selectedLocation === opt.value ? 'var(--color-navy)' : 'transparent',
-              color: selectedLocation === opt.value ? 'var(--color-paper)' : (opt.value === '__UNASSIGNED__' ? 'rgba(22,34,76,0.55)' : 'var(--color-navy)'),
-              cursor: 'pointer', padding: '9px 12px',
-              font: `600 11px 'Archivo', sans-serif`, letterSpacing: '0.04em', textTransform: 'uppercase',
-            }"
-            @click="selectedLocation = opt.value"
-          >
-            <span>{{ opt.label }}</span>
-            <span style="font: 400 10px 'JetBrains Mono', monospace; opacity: 0.7">{{ opt.count }}</span>
-          </button>
-        </div>
-      </aside>
+    <template v-else-if="selectedLocation">
+      <div style="border-bottom: 3px solid var(--color-navy); padding-bottom: 10px; margin-bottom: 18px">
+        <NuxtLink to="/storage" style="font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.1em; color: var(--color-rust); text-decoration: none">← BACK TO ALL BINS</NuxtLink>
+        <h1 style="margin: 8px 0 0; font: 400 28px 'Archivo Black', sans-serif; letter-spacing: -0.01em; text-transform: uppercase">{{ selectedLabel }}</h1>
+        <div style="font: 500 11px 'JetBrains Mono', monospace; letter-spacing: 0.08em; color: rgba(22,34,76,0.65); margin-top: 5px">{{ selectedItems.length }} ITEM{{ selectedItems.length === 1 ? '' : 'S' }}</div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(236px, 1fr)); gap: 16px">
+        <ItemCard
+          v-for="it in selectedItems"
+          :key="it.id"
+          :item="it"
+          :photo-url="primaryPhotoByItem[it.id] ?? null"
+          @click="navigateTo(`/items/${it.id}`)"
+        />
+      </div>
+    </template>
 
-      <section style="flex: 1; min-width: 0">
-        <div style="border-bottom: 3px solid var(--color-navy); padding-bottom: 10px; margin-bottom: 18px">
-          <h1 style="margin: 0; font: 400 28px 'Archivo Black', sans-serif; letter-spacing: -0.01em; text-transform: uppercase">{{ selectedLabel }}</h1>
-          <div style="font: 500 11px 'JetBrains Mono', monospace; letter-spacing: 0.08em; color: rgba(22,34,76,0.65); margin-top: 5px">{{ selectedItems.length }} ITEM{{ selectedItems.length === 1 ? '' : 'S' }}</div>
+    <template v-else>
+      <div style="border-bottom: 3px solid var(--color-navy); padding-bottom: 10px; margin-bottom: 18px">
+        <h1 style="margin: 0; font: 400 28px 'Archivo Black', sans-serif; letter-spacing: -0.01em; text-transform: uppercase">Where everything lives</h1>
+        <div style="font: 500 11px 'JetBrains Mono', monospace; letter-spacing: 0.08em; color: rgba(22,34,76,0.65); margin-top: 5px">{{ bins.length }} BIN{{ bins.length === 1 ? '' : 'S' }}</div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px">
+        <div
+          v-for="bin in bins"
+          :key="bin.key"
+          style="background: #fff; border: 1px solid var(--color-navy); cursor: pointer; display: flex; flex-direction: column"
+          @click="navigateTo(binHref(bin.key))"
+        >
+          <div style="background: var(--color-paper); border-bottom: 1px solid var(--color-navy); padding: 9px 12px; display: flex; justify-content: space-between; align-items: baseline">
+            <span style="font: 400 16px 'Archivo Black', sans-serif; letter-spacing: 0.02em; text-transform: uppercase">{{ bin.label }}</span>
+            <span style="font: 700 10px 'JetBrains Mono', monospace; color: var(--color-rust)">{{ bin.count }}</span>
+          </div>
+          <div style="padding: 11px 12px; display: flex; flex-direction: column; gap: 9px; flex: 1">
+            <div style="display: flex; flex-direction: column; gap: 3px">
+              <div v-for="name in bin.sample" :key="name" style="font-size: 12px; color: rgba(22,34,76,0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">· {{ name }}</div>
+            </div>
+            <div style="margin-top: auto; display: flex; gap: 4px; flex-wrap: wrap">
+              <span v-for="tag in bin.tags" :key="tag" style="background: var(--color-paper); border: 1px solid rgba(22,34,76,0.35); padding: 3px 6px; font: 500 9px 'JetBrains Mono', monospace; letter-spacing: 0.06em">{{ tag }}</span>
+            </div>
+          </div>
         </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(236px, 1fr)); gap: 16px">
-          <ItemCard
-            v-for="it in selectedItems"
-            :key="it.id"
-            :item="it"
-            :photo-url="primaryPhotoByItem[it.id] ?? null"
-            @click="navigateTo(`/items/${it.id}`)"
-          />
-        </div>
-      </section>
-    </div>
+      </div>
+    </template>
   </main>
 </template>

@@ -85,7 +85,7 @@ const storageOptions = computed(() => {
 
 const sortOptions = [
   { value: 'newest', label: 'Newest' },
-  { value: 'name', label: 'Name' },
+  { value: 'name', label: 'A-Z' },
   { value: 'value', label: 'Value' },
 ] as const;
 
@@ -159,6 +159,7 @@ function clearFilters() {
               background: selectedManufacturers.has(opt.value) ? 'var(--color-navy)' : 'transparent',
               color: selectedManufacturers.has(opt.value) ? 'var(--color-paper)' : 'var(--color-navy)',
               cursor: 'pointer', padding: '5px 8px', font: `500 10px 'JetBrains Mono', monospace`, letterSpacing: '0.06em',
+              textTransform: 'uppercase', whiteSpace: 'nowrap',
             }"
             @click="toggle(selectedManufacturers, opt.value)"
           >
@@ -177,6 +178,7 @@ function clearFilters() {
               background: selectedStorages.has(opt.value) ? 'var(--color-navy)' : 'transparent',
               color: selectedStorages.has(opt.value) ? 'var(--color-paper)' : 'var(--color-navy)',
               cursor: 'pointer', padding: '5px 8px', font: `500 10px 'JetBrains Mono', monospace`, letterSpacing: '0.06em',
+              textTransform: 'uppercase', whiteSpace: 'nowrap',
             }"
             @click="toggle(selectedStorages, opt.value)"
           >
@@ -184,6 +186,7 @@ function clearFilters() {
           </button>
         </div>
         <div style="height: 1px; background: rgba(22,34,76,0.2); margin: 14px 0" />
+        <div style="font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.1em; color: rgba(22,34,76,0.6); margin-bottom: 8px">VALUE</div>
         <button
           type="button"
           :style="{
@@ -211,7 +214,7 @@ function clearFilters() {
       <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; border-bottom: 3px solid var(--color-navy); padding-bottom: 10px; margin-bottom: 18px">
         <div>
           <h1 style="margin: 0; font: 400 28px 'Archivo Black', sans-serif; letter-spacing: -0.01em; text-transform: uppercase">Browse collection</h1>
-          <div style="font: 500 11px 'JetBrains Mono', monospace; letter-spacing: 0.08em; color: rgba(22,34,76,0.65); margin-top: 5px">{{ filteredItems.length }} ITEM{{ filteredItems.length === 1 ? '' : 'S' }}</div>
+          <div style="font: 500 11px 'JetBrains Mono', monospace; letter-spacing: 0.08em; color: rgba(22,34,76,0.65); margin-top: 5px">{{ filteredItems.length }} OF {{ items.length }} ITEMS SHOWN</div>
         </div>
         <div style="display: flex; align-items: center; gap: 8px">
           <span style="font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.08em; color: rgba(22,34,76,0.6)">SORT</span>

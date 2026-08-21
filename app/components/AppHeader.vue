@@ -4,18 +4,49 @@ import type { HeaderSearchResult } from '~/composables/useSearchItems';
 
 const { session, signOut } = useAuth();
 const { searchItems } = useSearchItems();
+const route = useRoute();
 
-const navItems = [
-  { label: 'Dashboard', to: '/' },
-  { label: 'Browse', to: '/browse' },
-  { label: 'Rocket Motors', to: '/browse?category=motor' },
-  { label: 'Model Airplanes', to: '/browse?category=plane' },
-  { label: 'Rocket Kits', to: '/browse?category=kit' },
-  { label: 'Rocket Parts', to: '/browse?category=part' },
-  { label: 'Books & Printed', to: '/browse?category=print' },
-  { label: 'Other Collectables', to: '/browse?category=other' },
-  { label: 'Storage', to: '/storage' },
-];
+const BROWSE_FAMILY = ['browse', 'motors', 'storage', 'search'];
+
+function isDetailRoute(path: string): boolean {
+  return path !== '/items/new' && /^\/items\/[^/]+$/.test(path);
+}
+
+function currentScreen(): string {
+  const path = route.path;
+  if (path === '/') return 'dash';
+  if (path === '/browse') return 'browse';
+  if (path === '/storage') return 'storage';
+  if (path === '/search') return 'search';
+  if (isDetailRoute(path)) return 'detail';
+  return '';
+}
+
+const primaryNavItems = computed(() => {
+  const screen = currentScreen();
+  return [
+    { label: 'Dashboard', to: '/', active: screen === 'dash' },
+    { label: 'Browse', to: '/browse', active: BROWSE_FAMILY.includes(screen) || screen === 'detail' },
+  ];
+});
+
+const inBrowseFamily = computed(() => BROWSE_FAMILY.includes(currentScreen()));
+
+const searchInputRef = ref<HTMLInputElement | null>(null);
+
+function focusSearch() {
+  searchInputRef.value?.focus();
+}
+
+const viewTabs = computed(() => {
+  const screen = currentScreen();
+  return [
+    { label: 'All items', to: '/browse', action: undefined, active: screen === 'browse' },
+    { label: 'Motors', to: '/browse?category=motor', action: undefined, active: screen === 'motors' },
+    { label: 'Storage', to: '/storage', action: undefined, active: screen === 'storage' },
+    { label: 'Search', to: undefined, action: focusSearch, active: screen === 'search' },
+  ];
+});
 
 async function handleSignOut() {
   await signOut();
@@ -67,10 +98,16 @@ function closeSearch() {
 
       <nav style="display: flex; gap: 2px; flex: 1">
         <NuxtLink
-          v-for="n in navItems"
+          v-for="n in primaryNavItems"
           :key="n.label"
           :to="n.to"
-          style="border: 0; cursor: pointer; padding: 7px 11px; font: 600 11px 'Archivo', sans-serif; letter-spacing: 0.09em; text-transform: uppercase; background: transparent; color: var(--color-paper); text-decoration: none"
+          :style="{
+            border: '0', cursor: 'pointer', padding: '7px 11px',
+            font: `600 11px 'Archivo', sans-serif`, letterSpacing: '0.09em', textTransform: 'uppercase',
+            background: n.active ? 'var(--color-orange)' : 'transparent',
+            color: n.active ? 'var(--color-navy)' : 'rgba(245,241,232,0.75)',
+            textDecoration: 'none',
+          }"
         >
           {{ n.label }}
         </NuxtLink>
@@ -79,6 +116,7 @@ function closeSearch() {
       <div style="display: flex; align-items: center; gap: 10px; flex: none">
         <div style="position: relative">
           <input
+            ref="searchInputRef"
             v-model="searchQuery"
             placeholder="Search the collection…"
             style="width: 230px; padding: 8px 11px; border: 1px solid rgba(245,241,232,0.3); background: rgba(245,241,232,0.08); color: var(--color-paper); font-size: 13px"
@@ -119,4 +157,40 @@ function closeSearch() {
       </div>
     </div>
   </header>
+
+  <div v-if="inBrowseFamily" style="border-bottom: 1px solid rgba(22,34,76,0.25); background: #EFEADD">
+    <div style="max-width: 1440px; margin: 0 auto; padding: 10px 28px; display: flex; align-items: center; gap: 6px">
+      <span style="font: 500 9.5px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.5); margin-right: 6px">VIEW</span>
+      <template v-for="t in viewTabs" :key="t.label">
+        <NuxtLink
+          v-if="t.to"
+          :to="t.to"
+          :style="{
+            border: `1px solid ${t.active ? 'var(--color-navy)' : 'rgba(22,34,76,0.3)'}`,
+            background: t.active ? 'var(--color-navy)' : 'transparent',
+            color: t.active ? 'var(--color-paper)' : 'rgba(22,34,76,0.7)',
+            cursor: 'pointer', padding: '6px 12px', display: 'inline-block',
+            font: `600 10.5px 'Archivo', sans-serif`, letterSpacing: '0.09em', textTransform: 'uppercase',
+            textDecoration: 'none',
+          }"
+        >
+          {{ t.label }}
+        </NuxtLink>
+        <button
+          v-else
+          type="button"
+          :style="{
+            border: `1px solid ${t.active ? 'var(--color-navy)' : 'rgba(22,34,76,0.3)'}`,
+            background: t.active ? 'var(--color-navy)' : 'transparent',
+            color: t.active ? 'var(--color-paper)' : 'rgba(22,34,76,0.7)',
+            cursor: 'pointer', padding: '6px 12px',
+            font: `600 10.5px 'Archivo', sans-serif`, letterSpacing: '0.09em', textTransform: 'uppercase',
+          }"
+          @click="t.action && t.action()"
+        >
+          {{ t.label }}
+        </button>
+      </template>
+    </div>
+  </div>
 </template>

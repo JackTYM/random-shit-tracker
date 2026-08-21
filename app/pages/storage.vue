@@ -93,7 +93,10 @@ const selectedLabel = computed(() => (selectedLocation.value === UNASSIGNED ? 'U
         <h1 style="margin: 8px 0 0; font: 400 28px 'Archivo Black', sans-serif; letter-spacing: -0.01em; text-transform: uppercase">{{ selectedLabel }}</h1>
         <div style="font: 500 11px 'JetBrains Mono', monospace; letter-spacing: 0.08em; color: rgba(22,34,76,0.65); margin-top: 5px">{{ selectedItems.length }} ITEM{{ selectedItems.length === 1 ? '' : 'S' }}</div>
       </div>
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(236px, 1fr)); gap: 16px">
+      <div v-if="selectedItems.length === 0" style="border: 1px dashed rgba(22,34,76,0.4); padding: 48px; text-align: center; font: 500 12px 'JetBrains Mono', monospace; letter-spacing: 0.08em; color: rgba(22,34,76,0.6)">
+        NO ITEMS IN THIS BIN
+      </div>
+      <div v-else style="display: grid; grid-template-columns: repeat(auto-fill, minmax(236px, 1fr)); gap: 16px">
         <ItemCard
           v-for="it in selectedItems"
           :key="it.id"

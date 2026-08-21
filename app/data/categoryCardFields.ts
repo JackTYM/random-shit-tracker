@@ -6,26 +6,26 @@ export interface CardField {
 // Keys here match raw item-record column names (unlike categoryFormFields.ts's p_-prefixed RPC params).
 export const CATEGORY_CARD_FIELDS: Record<string, CardField[]> = {
   motor: [
-    { key: 'designation', label: 'DESIGNATION' },
-    { key: 'diameter_mm', label: 'DIA' },
+    { key: 'impulse_class', label: 'Impulse Class' },
+    { key: 'designation', label: 'Designation' },
   ],
   kit: [
-    { key: 'diameter_in', label: 'DIA' },
-    { key: 'length_in', label: 'LEN' },
+    { key: 'length_in', label: 'Overall Length' },
+    { key: 'diameter_in', label: 'Body Diameter' },
   ],
   plane: [
-    { key: 'wingspan', label: 'SPAN' },
-    { key: 'model_type', label: 'TYPE' },
+    { key: 'wingspan', label: 'Wingspan' },
+    { key: 'model_type', label: 'Model Type' },
   ],
   part: [
-    { key: 'part_category', label: 'CATEGORY' },
-    { key: 'material', label: 'MATERIAL' },
+    { key: 'part_category', label: 'Part Category' },
+    { key: 'part_number', label: 'Part Number' },
   ],
   print: [
-    { key: 'print_category', label: 'CATEGORY' },
-    { key: 'year', label: 'YEAR' },
+    { key: 'print_category', label: 'Category' },
+    { key: 'year', label: 'Year' },
   ],
   other: [
-    { key: 'type', label: 'TYPE' },
+    { key: 'type', label: 'Type' },
   ],
 };

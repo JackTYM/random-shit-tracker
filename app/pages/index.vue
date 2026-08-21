@@ -4,10 +4,12 @@ import type { ItemRecord } from '~/composables/useItems';
 
 const { session, signOut } = useAuth();
 const { listItems, categoryDetail } = useItems();
+const { fetchPrimaryPhotos } = usePrimaryPhotos();
 
 const items = ref<ItemRecord[]>([]);
 const loading = ref(true);
 const loadError = ref('');
+const primaryPhotoByItem = ref<Record<string, string>>({});
 
 async function load() {
   loading.value = true;
@@ -16,9 +18,17 @@ async function load() {
     items.value = await listItems();
   } catch (e: any) {
     loadError.value = e?.message ?? 'Failed to load items.';
-  } finally {
     loading.value = false;
+    return;
   }
+
+  try {
+    primaryPhotoByItem.value = await fetchPrimaryPhotos(items.value.map((i) => i.id));
+  } catch {
+    primaryPhotoByItem.value = {};
+  }
+
+  loading.value = false;
 }
 
 onMounted(load);
@@ -63,7 +73,7 @@ const stats = computed(() => {
   ];
 });
 
-const recentlyAdded = computed(() => items.value.slice(0, 5));
+const recentlyAdded = computed(() => items.value.slice(0, 4));
 
 const missingValueCount = computed(() => items.value.filter((it) => it.approx_value_usd === null).length);
 </script>
@@ -107,17 +117,18 @@ const missingValueCount = computed(() => items.value.filter((it) => it.approx_va
         </div>
       </div>
 
-      <div style="background: #fff; border: 1px solid var(--color-navy); padding: 16px">
-        <div style="font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.1em; color: rgba(22,34,76,0.6); margin-bottom: 10px; border-bottom: 1px dashed rgba(22,34,76,0.3); padding-bottom: 8px">RECENTLY ADDED</div>
-        <button
+      <div style="display: flex; align-items: center; gap: 12px; margin: 34px 0 14px">
+        <h2 style="margin: 0; font: 400 14px 'Archivo Black', sans-serif; letter-spacing: 0.08em; text-transform: uppercase">Recently catalogued</h2>
+        <div style="flex: 1; height: 3px; background: var(--color-navy)" />
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px">
+        <ItemCard
           v-for="it in recentlyAdded"
           :key="it.id"
-          type="button"
-          style="display: block; width: 100%; border: 0; background: transparent; cursor: pointer; padding: 6px 0; font: 400 13px 'JetBrains Mono', monospace; color: var(--color-navy); text-align: left"
+          :item="it"
+          :photo-url="primaryPhotoByItem[it.id] ?? null"
           @click="navigateTo(`/items/${it.id}`)"
-        >
-          {{ it.name }}
-        </button>
+        />
       </div>
 
       <div v-if="missingValueCount > 0" style="background: #fff; border: 1px dashed var(--color-navy); padding: 14px; font: 400 13px 'JetBrains Mono', monospace; display: flex; justify-content: space-between; align-items: center; margin-top: 14px">

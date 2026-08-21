@@ -1,5 +1,10 @@
 import { sql } from 'drizzle-orm';
 
+// Column DEFAULT expressions evaluate auth.user_id() fresh under the querying role's own
+// privileges at INSERT time, which requires schema-level USAGE on `auth` that `authenticated`
+// was never granted (see migrations 0009/0010). RLS policies below don't hit this: their
+// expressions are resolved once at CREATE POLICY time under neondb_owner, which does have
+// that access, so isOwner/ownsItem can keep calling auth.user_id() directly.
 export const ownerDefault = sql`public.current_owner_id()`;
 
 // auth.user_id() returns text; owner_id columns are uuid. Postgres does not

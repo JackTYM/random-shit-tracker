@@ -11,6 +11,8 @@ export const items = pgTable('items', {
   name: text('name').notNull(),
   manufacturerOrClub: text('manufacturer_or_club'),
   storageLocation: text('storage_location'),
+  storageNote: text('storage_note'),
+  referenceCode: text('reference_code'),
   approxValueUsd: numeric('approx_value_usd'),
   valueEstimatedAt: date('value_estimated_at'),
   notes: text('notes'),

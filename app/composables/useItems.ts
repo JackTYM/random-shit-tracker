@@ -4,6 +4,8 @@ export interface ItemRecord {
   name: string;
   manufacturer_or_club: string | null;
   storage_location: string | null;
+  storage_note: string | null;
+  reference_code: string | null;
   approx_value_usd: string | null;
   value_estimated_at: string | null;
   notes: string | null;

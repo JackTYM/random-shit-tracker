@@ -29,6 +29,7 @@ export function useUpdateItem() {
         name: shared.name,
         manufacturer_or_club: shared.manufacturerOrClub,
         storage_location: shared.storageLocation,
+        storage_note: shared.storageNote,
         approx_value_usd: shared.approxValueUsd,
         value_estimated_at: shared.valueEstimatedAt,
         notes: shared.notes,

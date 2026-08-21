@@ -159,7 +159,7 @@ function clearFilters() {
               background: selectedManufacturers.has(opt.value) ? 'var(--color-navy)' : 'transparent',
               color: selectedManufacturers.has(opt.value) ? 'var(--color-paper)' : 'var(--color-navy)',
               cursor: 'pointer', padding: '5px 8px', font: `500 10px 'JetBrains Mono', monospace`, letterSpacing: '0.06em',
-              textTransform: 'uppercase', whiteSpace: 'nowrap', maxWidth: '100%',
+              textTransform: 'uppercase', whiteSpace: 'nowrap', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis',
             }"
             @click="toggle(selectedManufacturers, opt.value)"
           >
@@ -178,7 +178,7 @@ function clearFilters() {
               background: selectedStorages.has(opt.value) ? 'var(--color-navy)' : 'transparent',
               color: selectedStorages.has(opt.value) ? 'var(--color-paper)' : 'var(--color-navy)',
               cursor: 'pointer', padding: '5px 8px', font: `500 10px 'JetBrains Mono', monospace`, letterSpacing: '0.06em',
-              textTransform: 'uppercase', whiteSpace: 'nowrap', maxWidth: '100%',
+              textTransform: 'uppercase', whiteSpace: 'nowrap', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis',
             }"
             @click="toggle(selectedStorages, opt.value)"
           >

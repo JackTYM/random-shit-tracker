@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { CATEGORY_FORM_FIELDS, CATEGORY_LABELS } from '~/data/categoryFormFields';
+import { formatItemDetailAge } from '~/data/valueAge';
 
 const route = useRoute();
 const itemId = route.params.id as string;
@@ -70,6 +71,7 @@ const saveError = ref('');
 const editName = ref('');
 const editManufacturerOrClub = ref('');
 const editStorageLocation = ref('');
+const editStorageNote = ref('');
 const editApproxValueUsd = ref('');
 const editValueEstimatedAt = ref('');
 const editNotes = ref('');
@@ -81,6 +83,7 @@ function startEdit() {
   editName.value = item.value.name ?? '';
   editManufacturerOrClub.value = item.value.manufacturer_or_club ?? '';
   editStorageLocation.value = item.value.storage_location ?? '';
+  editStorageNote.value = item.value.storage_note ?? '';
   editApproxValueUsd.value = item.value.approx_value_usd ?? '';
   editValueEstimatedAt.value = item.value.value_estimated_at ?? '';
   editNotes.value = item.value.notes ?? '';
@@ -143,6 +146,7 @@ async function saveEdit() {
         name: editName.value.trim(),
         manufacturerOrClub: editManufacturerOrClub.value || null,
         storageLocation: editStorageLocation.value || null,
+        storageNote: editStorageNote.value || null,
         approxValueUsd: editApproxValueUsd.value ? Number(editApproxValueUsd.value) : null,
         valueEstimatedAt: editValueEstimatedAt.value || null,
         notes: editNotes.value || null,
@@ -185,6 +189,7 @@ async function duplicateItem() {
         name: `Copy of ${item.value.name}`,
         manufacturerOrClub: item.value.manufacturer_or_club,
         storageLocation: item.value.storage_location,
+        storageNote: item.value.storage_note,
         approxValueUsd: item.value.approx_value_usd != null ? Number(item.value.approx_value_usd) : null,
         valueEstimatedAt: item.value.value_estimated_at,
         notes: item.value.notes,
@@ -393,11 +398,12 @@ onMounted(async () => {
             <div v-if="item.approx_value_usd" style="background: var(--color-orange); border: 1px solid var(--color-navy); padding: 14px 16px">
               <div style="font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.75)">APPROX. VALUE</div>
               <div style="font: 400 38px 'Archivo Black', sans-serif; line-height: 1.05; margin-top: 4px">${{ Number(item.approx_value_usd).toFixed(2) }}</div>
-              <div v-if="item.value_estimated_at" style="font: 400 10.5px 'JetBrains Mono', monospace; color: rgba(22,34,76,0.8); margin-top: 4px">EST. {{ item.value_estimated_at }}</div>
+              <div v-if="item.value_estimated_at" style="font: 400 10.5px 'JetBrains Mono', monospace; color: rgba(22,34,76,0.8); margin-top: 4px">EST. {{ item.value_estimated_at }} · {{ formatItemDetailAge(item.value_estimated_at) }}</div>
             </div>
             <div style="background: #fff; border: 1px solid var(--color-navy); padding: 14px 16px">
               <div style="font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.6)">STORAGE LOCATION</div>
               <div style="font: 400 24px 'Archivo Black', sans-serif; line-height: 1.1; margin-top: 6px">{{ item.storage_location || '—' }}</div>
+              <div v-if="item.storage_note" style="font: 400 10.5px 'JetBrains Mono', monospace; color: rgba(22,34,76,0.7); margin-top: 4px">{{ item.storage_note }}</div>
             </div>
           </div>
 
@@ -420,6 +426,10 @@ onMounted(async () => {
             <div style="display: flex; flex-direction: column; gap: 5px">
               <label style="font: 500 9.5px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.65)">STORAGE LOCATION</label>
               <input v-model="editStorageLocation" style="padding: 9px 11px; border: 1px solid var(--color-navy); background: var(--color-paper); font-size: 13.5px; color: var(--color-navy)" />
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 5px">
+              <label style="font: 500 9.5px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.65)">STORAGE NOTE</label>
+              <input v-model="editStorageNote" style="padding: 9px 11px; border: 1px solid var(--color-navy); background: var(--color-paper); font-size: 13.5px; color: var(--color-navy)" />
             </div>
             <div style="display: flex; flex-direction: column; gap: 5px">
               <label style="font: 500 9.5px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.65)">APPROX. VALUE (USD)</label>
@@ -471,6 +481,7 @@ onMounted(async () => {
           <div style="background: var(--color-orange); border: 1px solid var(--color-navy); padding: 14px 18px; text-align: center; max-width: 230px">
             <div style="font: 700 9px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.75)">THIS ITEM</div>
             <div style="font: 400 17px 'Archivo Black', sans-serif; text-transform: uppercase; line-height: 1.1; margin-top: 5px">{{ item.name }}</div>
+            <div v-if="item.reference_code" style="font: 400 10px 'JetBrains Mono', monospace; margin-top: 4px; color: rgba(22,34,76,0.8)">{{ item.reference_code }}</div>
           </div>
           <div style="display: flex; flex-direction: column; gap: 14px; align-items: flex-start">
             <div v-for="r in links.filter((_, i) => i % 2 === 1)" :key="r.linkId" style="display: flex; align-items: center; width: 100%">

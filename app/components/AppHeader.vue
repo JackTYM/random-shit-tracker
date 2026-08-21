@@ -15,7 +15,7 @@ function isDetailRoute(path: string): boolean {
 function currentScreen(): string {
   const path = route.path;
   if (path === '/') return 'dash';
-  if (path === '/browse') return 'browse';
+  if (path === '/browse') return route.query.category === 'motor' ? 'motors' : 'browse';
   if (path === '/storage') return 'storage';
   if (path === '/search') return 'search';
   if (isDetailRoute(path)) return 'detail';

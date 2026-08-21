@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { CATEGORY_LABELS } from '~/data/categoryFormFields';
 import type { ItemRecord } from '~/composables/useItems';
+import { formatDashboardAge, monthsSince, STALE_MONTHS } from '~/data/valueAge';
 
 const { session, signOut } = useAuth();
 const { listItems, categoryDetail } = useItems();
@@ -76,6 +77,39 @@ const stats = computed(() => {
 const recentlyAdded = computed(() => items.value.slice(0, 4));
 
 const missingValueCount = computed(() => items.value.filter((it) => it.approx_value_usd === null).length);
+
+const IMPULSE_LADDER = ['1/2A', 'A', 'B', 'C', 'D', 'E', 'F', 'G'];
+
+const impulseBars = computed(() => {
+  const motorItems = items.value.filter((it) => it.category === 'motor');
+  const counts = new Map<string, number>();
+  for (const it of motorItems) {
+    const cls = String(categoryDetail(it)?.impulse_class ?? '').trim().toUpperCase();
+    if (!cls) continue;
+    counts.set(cls, (counts.get(cls) ?? 0) + 1);
+  }
+  const known = IMPULSE_LADDER.filter((cls) => counts.has(cls));
+  const unknown = [...counts.keys()].filter((cls) => !IMPULSE_LADDER.includes(cls)).sort();
+  const ordered = [...known, ...unknown];
+  const maxQty = Math.max(1, ...ordered.map((cls) => counts.get(cls) ?? 0));
+  return ordered.map((cls) => {
+    const qty = counts.get(cls) ?? 0;
+    return {
+      cls,
+      qty,
+      pct: `${Math.round((qty / maxQty) * 100)}%`,
+      note: qty <= 4 ? 'LOW STOCK' : '',
+    };
+  });
+});
+
+const staleList = computed(() => {
+  return items.value
+    .filter((it) => it.value_estimated_at && monthsSince(it.value_estimated_at) >= STALE_MONTHS)
+    .sort((a, b) => monthsSince(b.value_estimated_at!) - monthsSince(a.value_estimated_at!))
+    .slice(0, 5)
+    .map((it) => ({ id: it.id, name: it.name, date: it.value_estimated_at, age: formatDashboardAge(it.value_estimated_at!) }));
+});
 </script>
 
 <template>
@@ -140,6 +174,39 @@ const missingValueCount = computed(() => items.value.filter((it) => it.approx_va
         >
           view them
         </button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; margin-top: 14px">
+        <div style="background: #fff; border: 1px solid var(--color-navy); padding: 18px 20px">
+          <h3 style="margin: 0 0 14px; font: 400 13px 'Archivo Black', sans-serif; letter-spacing: 0.08em; text-transform: uppercase">Motors on hand</h3>
+          <div v-if="impulseBars.length === 0" style="font-size: 12.5px; color: rgba(22,34,76,0.5)">No motor items recorded yet.</div>
+          <div v-else style="display: flex; flex-direction: column; gap: 7px">
+            <div v-for="b in impulseBars" :key="b.cls" style="display: flex; align-items: center; gap: 10px">
+              <span style="width: 36px; flex: none; font: 400 15px 'Archivo Black', sans-serif">{{ b.cls }}</span>
+              <div style="flex: 1; height: 16px; background: var(--color-paper); border: 1px solid rgba(22,34,76,0.25)">
+                <div :style="{ height: '100%', width: b.pct, background: 'var(--color-orange)' }" />
+              </div>
+              <span style="width: 34px; text-align: right; font: 700 11px 'JetBrains Mono', monospace">{{ b.qty }}</span>
+              <span style="width: 78px; font: 400 10px 'JetBrains Mono', monospace; color: rgba(22,34,76,0.55)">{{ b.note }}</span>
+            </div>
+          </div>
+        </div>
+        <div style="background: #fff; border: 1px solid var(--color-navy); padding: 18px 20px">
+          <h3 style="margin: 0 0 14px; font: 400 13px 'Archivo Black', sans-serif; letter-spacing: 0.08em; text-transform: uppercase">Estimates needing review</h3>
+          <div v-if="staleList.length === 0" style="font-size: 12.5px; color: rgba(22,34,76,0.5)">Nothing is overdue for a review.</div>
+          <div v-else style="display: flex; flex-direction: column">
+            <div
+              v-for="s in staleList"
+              :key="s.id"
+              style="display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px dotted rgba(22,34,76,0.3); cursor: pointer"
+              @click="navigateTo(`/items/${s.id}`)"
+            >
+              <span style="flex: 1; font: 600 12.5px 'Archivo', sans-serif; text-transform: uppercase; letter-spacing: 0.02em">{{ s.name }}</span>
+              <span style="font: 400 10px 'JetBrains Mono', monospace; color: var(--color-rust)">{{ s.age }}</span>
+              <span style="width: 78px; text-align: right; font: 400 10px 'JetBrains Mono', monospace; color: rgba(22,34,76,0.6)">{{ s.date }}</span>
+            </div>
+          </div>
+        </div>
       </div>
     </template>
 

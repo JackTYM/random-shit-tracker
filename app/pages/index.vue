@@ -178,7 +178,7 @@ const staleList = computed(() => {
 
       <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; margin-top: 14px">
         <div style="background: #fff; border: 1px solid var(--color-navy); padding: 18px 20px">
-          <h3 style="margin: 0 0 14px; font: 400 13px 'Archivo Black', sans-serif; letter-spacing: 0.08em; text-transform: uppercase">Motors on hand</h3>
+          <h3 style="margin: 0 0 14px; font: 400 13px 'Archivo Black', sans-serif; letter-spacing: 0.08em; text-transform: uppercase">Motors by impulse class</h3>
           <div v-if="impulseBars.length === 0" style="font-size: 12.5px; color: rgba(22,34,76,0.5)">No motor items recorded yet.</div>
           <div v-else style="display: flex; flex-direction: column; gap: 7px">
             <div v-for="b in impulseBars" :key="b.cls" style="display: flex; align-items: center; gap: 10px">

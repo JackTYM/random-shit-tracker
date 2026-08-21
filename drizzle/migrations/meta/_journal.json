@@ -43,6 +43,13 @@
       "when": 1787289774442,
       "tag": "0005_drop_stale_item_function_overloads",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1787290201921,
+      "tag": "0006_restrict_item_function_execute_privileges",
+      "breakpoints": true
     }
   ]
 }

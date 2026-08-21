@@ -23,6 +23,15 @@ const saving = ref(false);
 
 const categories = Object.keys(CATEGORY_LABELS);
 
+const ADD_ITEM_CATEGORY_LABELS: Record<string, string> = {
+  motor: 'Rocket Motor',
+  kit: 'Rocket Kit',
+  plane: 'Model Airplane',
+  part: 'Rocket Part',
+  print: 'Printed Material',
+  other: 'Other Collectable',
+};
+
 function selectCategory(cat: string) {
   selectedCategory.value = cat;
   categoryValues.value = {};
@@ -139,7 +148,7 @@ async function save(andAddAnother: boolean) {
         </div>
         <div style="display: flex; flex-direction: column; gap: 5px">
           <label style="font: 500 9.5px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.65)">MANUFACTURER / CLUB</label>
-          <input v-model="manufacturerOrClub" style="padding: 9px 11px; border: 1px solid var(--color-navy); background: var(--color-paper); font-size: 13.5px; color: var(--color-navy)" />
+          <input v-model="manufacturerOrClub" placeholder="e.g. Centuri" style="padding: 9px 11px; border: 1px solid var(--color-navy); background: var(--color-paper); font-size: 13.5px; color: var(--color-navy)" />
         </div>
         <div style="display: flex; flex-direction: column; gap: 5px">
           <label style="font: 500 9.5px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.65)">STORAGE LOCATION</label>
@@ -151,7 +160,7 @@ async function save(andAddAnother: boolean) {
         </div>
         <div style="display: flex; flex-direction: column; gap: 5px">
           <label style="font: 500 9.5px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.65)">DATE OF ESTIMATE</label>
-          <input v-model="valueEstimatedAt" type="date" style="padding: 9px 11px; border: 1px solid var(--color-navy); background: var(--color-paper); font-size: 13.5px; color: var(--color-navy)" />
+          <input v-model="valueEstimatedAt" type="date" style="height: 36px; box-sizing: border-box; padding: 8px 11px; border: 1px solid var(--color-navy); background: var(--color-paper); font-size: 13.5px; color: var(--color-navy)" />
         </div>
         <div style="grid-column: span 3; display: flex; flex-direction: column; gap: 5px">
           <label style="font: 500 9.5px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.65)">NOTES</label>
@@ -160,7 +169,7 @@ async function save(andAddAnother: boolean) {
         <div style="grid-column: span 3; display: flex; gap: 10px; align-items: center; border: 1px dashed rgba(22,34,76,0.45); padding: 12px 14px">
           <span style="font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.1em; color: rgba(22,34,76,0.7)">PHOTOS</span>
           <span style="flex: 1; font-size: 12.5px; color: rgba(22,34,76,0.65)">
-            {{ uploading ? 'Uploading…' : stagedPhotos.length ? `${stagedPhotos.length} photo(s) attached — first becomes the card photo.` : 'First photo becomes the card photo.' }}
+            {{ uploading ? 'Uploading…' : stagedPhotos.length ? `${stagedPhotos.length} photo(s) attached — first becomes the card photo.` : 'Drop images here — first one becomes the card photo.' }}
           </span>
           <label style="border: 1px solid var(--color-navy); background: transparent; cursor: pointer; padding: 7px 12px; font: 600 10.5px 'Archivo', sans-serif; letter-spacing: 0.08em; text-transform: uppercase">
             Browse files
@@ -193,7 +202,7 @@ async function save(andAddAnother: boolean) {
           }"
           @click="selectCategory(cat)"
         >
-          {{ CATEGORY_LABELS[cat] }}
+          {{ ADD_ITEM_CATEGORY_LABELS[cat] }}
         </button>
       </div>
     </div>

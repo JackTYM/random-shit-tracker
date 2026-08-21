@@ -211,7 +211,7 @@ async function save(andAddAnother: boolean) {
     <div v-if="selectedCategory" style="background: #fff; border: 1px solid var(--color-navy); border-top: 0">
       <div style="background: var(--color-orange); color: var(--color-navy); padding: 9px 16px; display: flex; align-items: center; gap: 10px">
         <span style="background: var(--color-navy); color: var(--color-paper); width: 19px; height: 19px; display: flex; align-items: center; justify-content: center; font: 400 11px 'Archivo Black', sans-serif">3</span>
-        <span style="font: 400 11px 'Archivo Black', sans-serif; letter-spacing: 0.12em">{{ CATEGORY_LABELS[selectedCategory].toUpperCase() }} DETAILS</span>
+        <span style="font: 400 11px 'Archivo Black', sans-serif; letter-spacing: 0.12em">{{ ADD_ITEM_CATEGORY_LABELS[selectedCategory].toUpperCase() }} DETAILS</span>
       </div>
       <div style="padding: 18px 20px">
         <CategoryFieldsForm

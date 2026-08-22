@@ -17,15 +17,15 @@ const loadError = ref('');
 const primaryPhotoByItem = ref<Record<string, string>>({});
 
 async function runSearch(q: string) {
+  if (import.meta.server) return;
+
   if (!q) {
     results.value = [];
     primaryPhotoByItem.value = {};
     loadError.value = '';
     loading.value = false;
-    if (import.meta.client) {
-      await nextTick();
-      document.getElementById('header-search-input')?.focus();
-    }
+    await nextTick();
+    document.getElementById('header-search-input')?.focus();
     return;
   }
 

@@ -32,19 +32,13 @@ const primaryNavItems = computed(() => {
 
 const inBrowseFamily = computed(() => BROWSE_FAMILY.includes(currentScreen()));
 
-const searchInputRef = ref<HTMLInputElement | null>(null);
-
-function focusSearch() {
-  searchInputRef.value?.focus();
-}
-
 const viewTabs = computed(() => {
   const screen = currentScreen();
   return [
     { label: 'All items', to: '/browse', action: undefined, active: screen === 'browse' },
     { label: 'Motors', to: '/browse?category=motor', action: undefined, active: screen === 'motors' },
     { label: 'Storage', to: '/storage', action: undefined, active: screen === 'storage' },
-    { label: 'Search', to: undefined, action: focusSearch, active: screen === 'search' },
+    { label: 'Search', to: '/search', action: undefined, active: screen === 'search' },
   ];
 });
 
@@ -84,6 +78,13 @@ function selectResult(id: string) {
 function closeSearch() {
   searchOpen.value = false;
 }
+
+function submitSearch() {
+  const q = searchQuery.value.trim();
+  if (!q) return;
+  closeSearch();
+  navigateTo(`/search?q=${encodeURIComponent(q)}`);
+}
 </script>
 
 <template>
@@ -116,13 +117,14 @@ function closeSearch() {
       <div style="display: flex; align-items: center; gap: 10px; flex: none">
         <div style="position: relative">
           <input
-            ref="searchInputRef"
+            id="header-search-input"
             v-model="searchQuery"
             placeholder="Search the collection…"
             style="width: 230px; padding: 8px 11px; border: 1px solid rgba(245,241,232,0.3); background: rgba(245,241,232,0.08); color: var(--color-paper); font-size: 13px"
             @focus="searchResults.length > 0 && (searchOpen = true)"
             @blur="setTimeout(closeSearch, 150)"
             @keydown.escape="closeSearch"
+            @keydown.enter="submitSearch"
           />
           <div
             v-if="searchOpen"

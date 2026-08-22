@@ -2,6 +2,7 @@
 import { CATEGORY_LABELS } from '~/data/categoryFormFields';
 import type { ItemRecord } from '~/composables/useItems';
 import { formatDashboardAge, monthsSince, STALE_MONTHS } from '~/data/valueAge';
+import { orderImpulseClasses } from '~/data/impulseLadder';
 
 const { session, signOut } = useAuth();
 const { listItems, categoryDetail } = useItems();
@@ -78,8 +79,6 @@ const recentlyAdded = computed(() => items.value.slice(0, 4));
 
 const missingValueCount = computed(() => items.value.filter((it) => it.approx_value_usd === null).length);
 
-const IMPULSE_LADDER = ['1/2A', 'A', 'B', 'C', 'D', 'E', 'F', 'G'];
-
 const impulseBars = computed(() => {
   const motorItems = items.value.filter((it) => it.category === 'motor');
   const counts = new Map<string, number>();
@@ -88,9 +87,7 @@ const impulseBars = computed(() => {
     if (!cls) continue;
     counts.set(cls, (counts.get(cls) ?? 0) + Number(categoryDetail(it)?.quantity ?? 0));
   }
-  const known = IMPULSE_LADDER.filter((cls) => counts.has(cls));
-  const unknown = [...counts.keys()].filter((cls) => !IMPULSE_LADDER.includes(cls)).sort();
-  const ordered = [...known, ...unknown];
+  const ordered = orderImpulseClasses([...counts.keys()]);
   const maxQty = Math.max(1, ...ordered.map((cls) => counts.get(cls) ?? 0));
   return ordered.map((cls) => {
     const qty = counts.get(cls) ?? 0;

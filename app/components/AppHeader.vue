@@ -15,7 +15,8 @@ function isDetailRoute(path: string): boolean {
 function currentScreen(): string {
   const path = route.path;
   if (path === '/') return 'dash';
-  if (path === '/browse') return route.query.category === 'motor' ? 'motors' : 'browse';
+  if (path === '/browse') return 'browse';
+  if (path === '/motors') return 'motors';
   if (path === '/storage') return 'storage';
   if (path === '/search') return 'search';
   if (isDetailRoute(path)) return 'detail';
@@ -36,7 +37,7 @@ const viewTabs = computed(() => {
   const screen = currentScreen();
   return [
     { label: 'All items', to: '/browse', action: undefined, active: screen === 'browse' },
-    { label: 'Motors', to: '/browse?category=motor', action: undefined, active: screen === 'motors' },
+    { label: 'Motors', to: '/motors', action: undefined, active: screen === 'motors' },
     { label: 'Storage', to: '/storage', action: undefined, active: screen === 'storage' },
     { label: 'Search', to: '/search', action: undefined, active: screen === 'search' },
   ];

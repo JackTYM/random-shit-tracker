@@ -82,6 +82,7 @@ function closeSearch() {
 function submitSearch() {
   const q = searchQuery.value.trim();
   if (!q) return;
+  if (searchDebounce) clearTimeout(searchDebounce);
   closeSearch();
   navigateTo(`/search?q=${encodeURIComponent(q)}`);
 }

@@ -12,7 +12,7 @@ const query = computed(() => {
 });
 
 const results = ref<SearchResultDetailed[]>([]);
-const loading = ref(false);
+const loading = ref(!!route.query.q);
 const loadError = ref('');
 const primaryPhotoByItem = ref<Record<string, string>>({});
 

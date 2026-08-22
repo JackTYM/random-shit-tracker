@@ -92,12 +92,12 @@ function submitSearch() {
 <template>
   <header style="position: sticky; top: 0; z-index: 20; background: var(--color-navy); border-bottom: 4px solid var(--color-orange)">
     <div style="max-width: 1440px; margin: 0 auto; padding: 0 28px; height: 62px; display: flex; align-items: center; gap: 28px">
-      <div style="display: flex; align-items: baseline; gap: 6px; flex: none">
+      <NuxtLink to="/" style="display: flex; align-items: baseline; gap: 6px; flex: none; text-decoration: none">
         <span style="font: 400 19px 'Archivo Black', sans-serif; letter-spacing: -0.01em; color: var(--color-paper)">
           RANDOM<span style="color: var(--color-orange)">SHIT</span>TRACKER
         </span>
         <span style="font: 500 10px 'JetBrains Mono', monospace; color: rgba(245,241,232,0.45)">.COM</span>
-      </div>
+      </NuxtLink>
 
       <nav style="display: flex; gap: 2px; flex: 1">
         <NuxtLink

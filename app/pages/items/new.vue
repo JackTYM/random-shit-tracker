@@ -3,6 +3,7 @@ import { CATEGORY_LABELS, CATEGORY_FORM_FIELDS } from '~/data/categoryFormFields
 
 const { createItem } = useCreateItem();
 const { uploadPhoto } = useUploadPhoto();
+const { uploadDocument } = useUploadDocument();
 
 const name = ref('');
 const manufacturerOrClub = ref('');
@@ -14,6 +15,9 @@ const notes = ref('');
 
 const stagedPhotos = ref<{ key: string; publicUrl: string; previewName: string }[]>([]);
 const uploading = ref(false);
+
+const stagedDocuments = ref<{ key: string; publicUrl: string; filename: string }[]>([]);
+const uploadingDocument = ref(false);
 
 const selectedCategory = ref<string | null>(null);
 const categoryValues = ref<Record<string, string>>({});
@@ -58,6 +62,25 @@ async function handleFileInput(e: Event) {
   }
 }
 
+async function handleDocumentInput(e: Event) {
+  const input = e.target as HTMLInputElement;
+  const files = input.files ? Array.from(input.files) : [];
+  if (!files.length) return;
+  uploadingDocument.value = true;
+  error.value = '';
+  try {
+    for (const file of files) {
+      const uploaded = await uploadDocument(file);
+      stagedDocuments.value.push({ ...uploaded, filename: file.name });
+    }
+  } catch (e: any) {
+    error.value = e?.message ?? 'Document upload failed.';
+  } finally {
+    uploadingDocument.value = false;
+    input.value = '';
+  }
+}
+
 function buildCategoryFieldPayload(fields: { key: string; type: string; otherKey?: string }[]): Record<string, unknown> {
   const payload: Record<string, unknown> = {};
   for (const field of fields) {
@@ -84,6 +107,7 @@ function resetForm() {
   valueEstimatedAt.value = '';
   notes.value = '';
   stagedPhotos.value = [];
+  stagedDocuments.value = [];
   selectedCategory.value = null;
   categoryValues.value = {};
   otherValues.value = {};
@@ -101,7 +125,7 @@ async function save(andAddAnother: boolean) {
   }
   saving.value = true;
   try {
-    await createItem(
+    const newItemId = await createItem(
       selectedCategory.value,
       {
         name: name.value.trim(),
@@ -115,6 +139,19 @@ async function save(andAddAnother: boolean) {
       buildCategoryFieldPayload(CATEGORY_FORM_FIELDS[selectedCategory.value] ?? []),
       stagedPhotos.value,
     );
+
+    if (stagedDocuments.value.length > 0) {
+      const client = useNeonClient();
+      const { error: docError } = await client.from('item_documents').insert(
+        stagedDocuments.value.map((d) => ({
+          item_id: newItemId,
+          r2_key: d.key,
+          url: d.publicUrl,
+          filename: d.filename,
+        })),
+      );
+      if (docError) throw docError;
+    }
 
     if (andAddAnother) {
       resetForm();
@@ -181,6 +218,16 @@ async function save(andAddAnother: boolean) {
           <label style="border: 1px solid var(--color-navy); background: transparent; cursor: pointer; padding: 7px 12px; font: 600 10.5px 'Archivo', sans-serif; letter-spacing: 0.08em; text-transform: uppercase">
             Browse files
             <input type="file" accept="image/jpeg,image/png,image/webp" multiple :disabled="uploading" style="display: none" @change="handleFileInput" />
+          </label>
+        </div>
+        <div style="grid-column: span 3; display: flex; gap: 10px; align-items: center; border: 1px dashed rgba(22,34,76,0.45); padding: 12px 14px">
+          <span style="font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.1em; color: rgba(22,34,76,0.7)">DOCUMENTS</span>
+          <span style="flex: 1; font-size: 12.5px; color: rgba(22,34,76,0.65)">
+            {{ uploadingDocument ? 'Uploading…' : stagedDocuments.length ? stagedDocuments.map((d) => d.filename).join(', ') : 'Manuals, receipts, certificates — optional.' }}
+          </span>
+          <label style="border: 1px solid var(--color-navy); background: transparent; cursor: pointer; padding: 7px 12px; font: 600 10.5px 'Archivo', sans-serif; letter-spacing: 0.08em; text-transform: uppercase">
+            Browse files
+            <input type="file" multiple :disabled="uploadingDocument" style="display: none" @change="handleDocumentInput" />
           </label>
         </div>
       </div>

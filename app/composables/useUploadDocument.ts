@@ -13,7 +13,7 @@ export function useUploadDocument() {
     const jwt = data?.session?.token;
     if (!jwt) throw new Error('Not signed in');
 
-    const presign = await $fetch<{ uploadUrl: string; publicUrl: string; key: string }>(
+    const presign = await $fetch<{ uploadUrl: string; publicUrl: string; key: string; contentType: string }>(
       '/api/uploads/presign-document',
       {
         method: 'POST',
@@ -22,9 +22,12 @@ export function useUploadDocument() {
       },
     );
 
+    // content-type is part of the presigned signature, and the server normalizes it (strips
+    // parameters, lowercases), so send back exactly what it signed — anything else is rejected
+    // by R2 with SignatureDoesNotMatch.
     await $fetch(presign.uploadUrl, {
       method: 'PUT',
-      headers: { 'Content-Type': file.type || 'application/octet-stream' },
+      headers: { 'Content-Type': presign.contentType },
       body: file,
     });
 

@@ -103,6 +103,7 @@ function metaLine(r: SearchResultDetailed): string {
           <div
             v-for="r in g.rows"
             :key="r.id"
+            class="rt-search-row"
             style="display: flex; align-items: center; gap: 14px; padding: 11px 14px; border-bottom: 1px dotted rgba(22,34,76,0.3); cursor: pointer"
             @click="navigateTo(`/items/${r.id}`)"
           >
@@ -112,11 +113,27 @@ function metaLine(r: SearchResultDetailed): string {
               <div style="font: 400 14px 'Archivo Black', sans-serif; text-transform: uppercase">{{ r.name }}</div>
               <div v-if="metaLine(r)" style="font: 400 10.5px 'JetBrains Mono', monospace; color: rgba(22,34,76,0.65); margin-top: 3px">{{ metaLine(r) }}</div>
             </div>
-            <span style="font: 500 10.5px 'JetBrains Mono', monospace; letter-spacing: 0.06em; color: var(--color-navy)">▪ {{ r.storage_location || '—' }}</span>
-            <span v-if="r.approx_value_usd" style="width: 70px; text-align: right; font: 400 15px 'Archivo Black', sans-serif; color: var(--color-rust)">${{ Number(r.approx_value_usd).toFixed(2) }}</span>
+            <div class="rt-search-meta" style="display: flex; align-items: center; gap: 10px">
+              <span style="font: 500 10.5px 'JetBrains Mono', monospace; letter-spacing: 0.06em; color: var(--color-navy)">▪ {{ r.storage_location || '—' }}</span>
+              <span v-if="r.approx_value_usd" style="width: 70px; text-align: right; font: 400 15px 'Archivo Black', sans-serif; color: var(--color-rust)">${{ Number(r.approx_value_usd).toFixed(2) }}</span>
+            </div>
           </div>
         </div>
       </div>
     </template>
   </main>
 </template>
+
+<style scoped>
+@media (max-width: 768px) {
+  .rt-search-row {
+    flex-wrap: wrap;
+  }
+
+  .rt-search-meta {
+    flex: 1 1 100%;
+    justify-content: space-between;
+    padding-left: 60px;
+  }
+}
+</style>

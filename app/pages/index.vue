@@ -135,7 +135,7 @@ const staleList = computed(() => {
         <h2 style="margin: 0; font: 400 14px 'Archivo Black', sans-serif; letter-spacing: 0.08em; text-transform: uppercase">Collection by category</h2>
         <div style="flex: 1; height: 3px; background: var(--color-navy)" />
       </div>
-      <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 14px">
+      <div class="rt-dash-grid-6" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 14px">
         <div
           v-for="c in categoryBreakdown"
           :key="c.value"
@@ -152,7 +152,7 @@ const staleList = computed(() => {
         <h2 style="margin: 0; font: 400 14px 'Archivo Black', sans-serif; letter-spacing: 0.08em; text-transform: uppercase">Recently catalogued</h2>
         <div style="flex: 1; height: 3px; background: var(--color-navy)" />
       </div>
-      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px">
+      <div class="rt-dash-grid-4" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px">
         <ItemCard
           v-for="it in recentlyAdded"
           :key="it.id"
@@ -173,14 +173,14 @@ const staleList = computed(() => {
         </button>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; margin-top: 14px">
+      <div class="rt-dash-two-col" style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; margin-top: 14px">
         <div style="background: #fff; border: 1px solid var(--color-navy); padding: 18px 20px">
           <h3 style="margin: 0 0 14px; font: 400 13px 'Archivo Black', sans-serif; letter-spacing: 0.08em; text-transform: uppercase">Motors by impulse class</h3>
           <div v-if="impulseBars.length === 0" style="font-size: 12.5px; color: rgba(22,34,76,0.5)">No motor items recorded yet.</div>
-          <div v-else style="display: flex; flex-direction: column; gap: 7px">
+          <div v-else class="rt-impulse-chart-wrap" style="display: flex; flex-direction: column; gap: 7px">
             <div v-for="b in impulseBars" :key="b.cls" style="display: flex; align-items: center; gap: 10px">
               <span style="width: 36px; flex: none; font: 400 15px 'Archivo Black', sans-serif">{{ b.cls }}</span>
-              <div style="flex: 1; height: 16px; background: var(--color-paper); border: 1px solid rgba(22,34,76,0.25)">
+              <div class="rt-impulse-bar-track" style="flex: 1; height: 16px; background: var(--color-paper); border: 1px solid rgba(22,34,76,0.25)">
                 <div :style="{ height: '100%', width: b.pct, background: 'var(--color-orange)' }" />
               </div>
               <span style="width: 34px; text-align: right; font: 700 11px 'JetBrains Mono', monospace">{{ b.qty }}</span>
@@ -219,3 +219,24 @@ const staleList = computed(() => {
     </div>
   </main>
 </template>
+
+<style scoped>
+@media (max-width: 768px) {
+  .rt-dash-grid-6,
+  .rt-dash-grid-4 {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+  }
+
+  .rt-dash-two-col {
+    grid-template-columns: 1fr !important;
+  }
+
+  .rt-impulse-chart-wrap {
+    overflow-x: auto;
+  }
+
+  .rt-impulse-bar-track {
+    min-width: 60px;
+  }
+}
+</style>

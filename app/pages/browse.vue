@@ -124,8 +124,8 @@ function clearFilters() {
 </script>
 
 <template>
-  <main style="max-width: 1440px; margin: 0 auto; padding: 24px 28px 64px; display: flex; gap: 24px; align-items: flex-start">
-    <aside style="width: 236px; flex: none; position: sticky; top: 86px">
+  <main class="rt-browse-shell" style="max-width: 1440px; margin: 0 auto; padding: 24px 28px 64px; display: flex; gap: 24px; align-items: flex-start">
+    <aside class="rt-browse-sidebar" style="width: 236px; flex: none; position: sticky; top: 86px">
       <div style="background: var(--color-navy); color: var(--color-paper); padding: 9px 12px; font: 400 11px 'Archivo Black', sans-serif; letter-spacing: 0.1em">FILTERS</div>
       <div style="background: #fff; border: 1px solid var(--color-navy); border-top: 0; padding: 14px 12px">
         <div style="font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.1em; color: rgba(22,34,76,0.6); margin-bottom: 8px">CATEGORY</div>
@@ -134,6 +134,7 @@ function clearFilters() {
             v-for="opt in categoryOptions"
             :key="opt.value"
             type="button"
+            class="rt-tap-target"
             :style="{
               textAlign: 'left', border: '1px solid var(--color-navy)',
               background: selectedCategories.has(opt.value) ? 'var(--color-navy)' : 'transparent',
@@ -154,6 +155,7 @@ function clearFilters() {
             v-for="opt in manufacturerOptions"
             :key="opt.value"
             type="button"
+            class="rt-tap-target"
             :style="{
               border: '1px solid var(--color-navy)',
               background: selectedManufacturers.has(opt.value) ? 'var(--color-navy)' : 'transparent',
@@ -173,6 +175,7 @@ function clearFilters() {
             v-for="opt in storageOptions"
             :key="opt.value"
             type="button"
+            class="rt-tap-target"
             :style="{
               border: '1px solid var(--color-navy)',
               background: selectedStorages.has(opt.value) ? 'var(--color-navy)' : 'transparent',
@@ -189,6 +192,7 @@ function clearFilters() {
         <div style="font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.1em; color: rgba(22,34,76,0.6); margin-bottom: 8px">VALUE</div>
         <button
           type="button"
+          class="rt-tap-target"
           :style="{
             width: '100%', textAlign: 'left', border: '1px solid var(--color-navy)',
             background: missingValueOnly ? 'var(--color-navy)' : 'transparent',
@@ -252,3 +256,20 @@ function clearFilters() {
     </section>
   </main>
 </template>
+
+<style scoped>
+@media (max-width: 768px) {
+  .rt-browse-shell {
+    flex-direction: column !important;
+  }
+
+  .rt-browse-sidebar {
+    width: 100% !important;
+    position: static !important;
+  }
+
+  .rt-tap-target {
+    min-height: 44px !important;
+  }
+}
+</style>

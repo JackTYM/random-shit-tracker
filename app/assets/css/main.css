@@ -30,9 +30,36 @@ input, select, textarea, button {
 
 select {
   appearance: none;
-  background-image: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath fill='%2316224C' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 10px 6px;
+  padding-right: 26px;
 }
 
 ::placeholder {
   color: rgba(22, 34, 76, 0.35);
+}
+
+/* Header search input sits on a dark background; the app-wide placeholder color (dark navy)
+   is unreadable there. Scoped to this one input's id — every other placeholder in the app is
+   correctly dark-on-light and must not change. */
+#header-search-input::placeholder {
+  color: rgba(245, 241, 232, 0.5);
+}
+
+/* Shared responsive visibility utilities. Marked !important deliberately: these exist
+   specifically to override elements' own inline `style="display: ..."` attributes (which this
+   codebase uses everywhere and which always win over a plain, non-important class rule). Only
+   ever used to toggle `display` — never for ordinary styling. */
+@media (max-width: 768px) {
+  .rt-desktop-only {
+    display: none !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .rt-mobile-only {
+    display: none !important;
+  }
 }

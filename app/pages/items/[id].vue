@@ -10,10 +10,12 @@ const { updateItem } = useUpdateItem();
 const client = useNeonClient();
 const { createItem } = useCreateItem();
 const { uploadPhoto } = useUploadPhoto();
+const { uploadDocument } = useUploadDocument();
 const { listLinks, createLink, searchItems } = useItemLinks();
 
 const item = ref<any>(null);
 const photos = ref<{ id: string; r2_key: string; url: string; sort_order: number; is_primary: boolean }[]>([]);
+const documents = ref<{ id: string; r2_key: string; url: string; filename: string; created_at: string }[]>([]);
 const loading = ref(true);
 const loadError = ref('');
 
@@ -35,6 +37,14 @@ async function loadItem() {
       .order('sort_order', { ascending: true });
     if (photoError) throw photoError;
     photos.value = (photoRows ?? []) as typeof photos.value;
+
+    const { data: documentRows, error: documentError } = await client
+      .from('item_documents')
+      .select('id, r2_key, url, filename, created_at')
+      .eq('item_id', itemId)
+      .order('created_at', { ascending: true });
+    if (documentError) throw documentError;
+    documents.value = (documentRows ?? []) as typeof documents.value;
   } catch (e: any) {
     loadError.value = e?.message ?? 'Failed to load item.';
   } finally {
@@ -259,6 +269,44 @@ async function handleAddPhoto(e: Event) {
   }
 }
 
+// --- Add document ---
+
+const addingDocument = ref(false);
+
+async function handleAddDocument(e: Event) {
+  const input = e.target as HTMLInputElement;
+  const files = input.files ? Array.from(input.files) : [];
+  if (!files.length || !item.value) return;
+  addingDocument.value = true;
+  saveError.value = '';
+  try {
+    const rows: { item_id: string; r2_key: string; url: string; filename: string }[] = [];
+    for (const file of files) {
+      const uploaded = await uploadDocument(file);
+      rows.push({ item_id: itemId, r2_key: uploaded.key, url: uploaded.publicUrl, filename: file.name });
+    }
+    const { error: insertError } = await client.from('item_documents').insert(rows);
+    if (insertError) throw insertError;
+    await loadItem();
+  } catch (e: any) {
+    saveError.value = e?.message ?? 'Failed to add document.';
+  } finally {
+    addingDocument.value = false;
+    input.value = '';
+  }
+}
+
+async function downloadDocument(doc: { url: string; filename: string }) {
+  const response = await fetch(doc.url);
+  const blob = await response.blob();
+  const blobUrl = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = blobUrl;
+  a.download = doc.filename;
+  a.click();
+  URL.revokeObjectURL(blobUrl);
+}
+
 // --- Linking ---
 
 const links = ref<{ linkId: string; id: string; name: string; category: string; relationshipLabel: string }[]>([]);
@@ -415,6 +463,23 @@ onMounted(async () => {
           <div v-if="item.notes" style="background: #fff; border: 1px solid var(--color-navy); margin-top: 14px; padding: 14px 16px">
             <div style="font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.6); margin-bottom: 7px">NOTES</div>
             <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: rgba(22,34,76,0.9)">{{ item.notes }}</p>
+          </div>
+
+          <div style="background: #fff; border: 1px solid var(--color-navy); margin-top: 14px; padding: 14px 16px">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px">
+              <div style="font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.6)">DOCUMENTS</div>
+              <label style="border: 1px solid var(--color-navy); cursor: pointer; background: transparent; color: var(--color-navy); padding: 6px 11px; font: 600 10px 'Archivo', sans-serif; letter-spacing: 0.06em; text-transform: uppercase">
+                {{ addingDocument ? 'Uploading…' : '+ Add document' }}
+                <input type="file" multiple :disabled="addingDocument" style="display: none" @change="handleAddDocument" />
+              </label>
+            </div>
+            <div v-if="documents.length === 0" style="font-size: 12.5px; color: rgba(22,34,76,0.5)">No documents attached yet.</div>
+            <div v-for="doc in documents" :key="doc.id" style="display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px dotted rgba(22,34,76,0.3)">
+              <span style="flex: 1; font-size: 13px; color: var(--color-navy); overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ doc.filename }}</span>
+              <span style="font: 400 10px 'JetBrains Mono', monospace; color: rgba(22,34,76,0.5)">{{ doc.created_at.slice(0, 10) }}</span>
+              <a :href="doc.url" target="_blank" rel="noopener" style="font: 600 10.5px 'Archivo', sans-serif; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-navy); text-decoration: underline">Open</a>
+              <button type="button" style="border: 0; background: transparent; cursor: pointer; padding: 0; font: 600 10.5px 'Archivo', sans-serif; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-rust); text-decoration: underline" @click="downloadDocument(doc)">Download</button>
+            </div>
           </div>
         </template>
 

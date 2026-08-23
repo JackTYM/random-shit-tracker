@@ -113,7 +113,7 @@ function metaLine(r: SearchResultDetailed): string {
               <div style="font: 400 14px 'Archivo Black', sans-serif; text-transform: uppercase">{{ r.name }}</div>
               <div v-if="metaLine(r)" style="font: 400 10.5px 'JetBrains Mono', monospace; color: rgba(22,34,76,0.65); margin-top: 3px">{{ metaLine(r) }}</div>
             </div>
-            <div class="rt-search-meta" style="display: flex; align-items: center; gap: 10px">
+            <div class="rt-search-meta" style="display: flex; align-items: center; gap: 14px">
               <span style="font: 500 10.5px 'JetBrains Mono', monospace; letter-spacing: 0.06em; color: var(--color-navy)">▪ {{ r.storage_location || '—' }}</span>
               <span v-if="r.approx_value_usd" style="width: 70px; text-align: right; font: 400 15px 'Archivo Black', sans-serif; color: var(--color-rust)">${{ Number(r.approx_value_usd).toFixed(2) }}</span>
             </div>

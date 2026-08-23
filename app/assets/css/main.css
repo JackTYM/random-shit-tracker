@@ -28,13 +28,16 @@ input, select, textarea, button {
   font-family: var(--font-ui);
 }
 
+/* Every <select> in the app sets its own inline `background`/`padding` shorthand, which resets
+   background-image (and its repeat/position/size) and padding-right to their initial values,
+   overriding this rule entirely unless each of those longhands is marked !important here. */
 select {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath fill='%2316224C' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  background-size: 10px 6px;
-  padding-right: 26px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath fill='%2316224C' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 10px center !important;
+  background-size: 10px 6px !important;
+  padding-right: 26px !important;
 }
 
 ::placeholder {

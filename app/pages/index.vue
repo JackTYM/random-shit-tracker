@@ -119,7 +119,7 @@ const staleList = computed(() => {
     </div>
 
     <template v-else>
-      <div style="background: var(--color-orange); border: 1px solid var(--color-navy); padding: 22px 26px; display: flex; align-items: stretch; gap: 0; margin-bottom: 18px">
+      <div class="rt-dash-stats" style="background: var(--color-orange); border: 1px solid var(--color-navy); padding: 22px 26px; display: flex; align-items: stretch; gap: 0; margin-bottom: 18px">
         <div
           v-for="(s, i) in stats"
           :key="s.label"
@@ -222,6 +222,13 @@ const staleList = computed(() => {
 
 <style scoped>
 @media (max-width: 768px) {
+  /* This row was missed by the original responsiveness pass — three equal-flex tiles with
+     22px horizontal padding each don't fit a 390px viewport and were clipping the third tile. */
+  .rt-dash-stats {
+    flex-direction: column !important;
+    gap: 14px !important;
+  }
+
   .rt-dash-grid-6,
   .rt-dash-grid-4 {
     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;

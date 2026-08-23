@@ -262,6 +262,10 @@ function clearFilters() {
 @media (max-width: 768px) {
   .rt-browse-shell {
     flex-direction: column !important;
+    /* The shell's own inline align-items: flex-start sizes a column-flex child (the results
+       section) to max-content instead of stretching it full-width, clipping the sort buttons
+       and item cards at the right edge. */
+    align-items: stretch !important;
   }
 
   .rt-browse-sidebar {

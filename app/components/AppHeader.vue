@@ -141,12 +141,12 @@ watch(
 
 <template>
   <header style="position: sticky; top: 0; z-index: 20; background: var(--color-navy); border-bottom: 4px solid var(--color-orange)">
-    <div style="max-width: 1440px; margin: 0 auto; padding: 0 28px; height: 62px; display: flex; align-items: center; gap: 28px">
+    <div class="rt-header-bar" style="max-width: 1440px; margin: 0 auto; padding: 0 28px; height: 62px; display: flex; align-items: center; gap: 28px">
       <NuxtLink to="/" style="display: flex; align-items: baseline; gap: 6px; flex: none; text-decoration: none">
-        <span style="font: 400 19px 'Archivo Black', sans-serif; letter-spacing: -0.01em; color: var(--color-paper)">
+        <span class="rt-logo-wordmark" style="font: 400 19px 'Archivo Black', sans-serif; letter-spacing: -0.01em; color: var(--color-paper)">
           RANDOM<span style="color: var(--color-orange)">SHIT</span>TRACKER
         </span>
-        <span style="font: 500 10px 'JetBrains Mono', monospace; color: rgba(245,241,232,0.45)">.COM</span>
+        <span class="rt-desktop-only" style="font: 500 10px 'JetBrains Mono', monospace; color: rgba(245,241,232,0.45)">.COM</span>
       </NuxtLink>
 
       <nav class="rt-desktop-only" style="display: flex; gap: 2px; flex: 1">
@@ -309,6 +309,18 @@ watch(
 
 <style scoped>
 @media (max-width: 768px) {
+  /* The 273px-wide wordmark plus its 28px/28px padding+gap left no room for the SEARCH/ACCT
+     buttons at 390px, pushing them off-screen. Shrink the bar's own spacing and the wordmark's
+     font-size (the .COM suffix is hidden entirely via .rt-desktop-only, added above). */
+  .rt-header-bar {
+    padding: 0 10px !important;
+    gap: 6px !important;
+  }
+
+  .rt-logo-wordmark {
+    font-size: 13px !important;
+  }
+
   .rt-header-search-wrap {
     display: none;
   }

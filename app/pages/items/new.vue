@@ -175,6 +175,45 @@ async function save(andAddAnother: boolean) {
       </div>
     </div>
 
+    <!-- Photos -->
+    <div style="background: #fff; border: 1px solid var(--color-navy); margin-bottom: 20px; padding: 16px">
+      <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px">
+        <div v-if="stagedPhotos.length === 0" style="width: 140px; height: 140px; flex: none; display: flex; align-items: center; justify-content: center; background: repeating-linear-gradient(135deg, #EAE4D5 0 6px, var(--color-paper) 6px 12px); border: 1px solid rgba(22,34,76,0.45)">
+          <span style="font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.08em; color: rgba(22,34,76,0.5); text-align: center; padding: 0 10px">NO PHOTO YET</span>
+        </div>
+        <img
+          v-for="p in stagedPhotos"
+          :key="p.key"
+          :src="p.publicUrl"
+          :alt="p.previewName"
+          style="width: 140px; height: 140px; flex: none; object-fit: cover; border: 1px solid var(--color-navy)"
+        />
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center; margin-top: 12px">
+        <span style="flex: 1; font-size: 12.5px; color: rgba(22,34,76,0.65)">
+          {{ uploading ? 'Uploading…' : stagedPhotos.length ? `${stagedPhotos.length} photo(s) attached — first becomes the card photo.` : 'Drop images here — first one becomes the card photo.' }}
+        </span>
+        <label style="border: 1px solid var(--color-navy); background: transparent; cursor: pointer; padding: 7px 12px; font: 600 10.5px 'Archivo', sans-serif; letter-spacing: 0.08em; text-transform: uppercase">
+          Browse files
+          <input type="file" accept="image/jpeg,image/png,image/webp" multiple :disabled="uploading" style="display: none" @change="handleFileInput" />
+        </label>
+      </div>
+    </div>
+
+    <!-- Documents -->
+    <div style="background: #fff; border: 1px solid var(--color-navy); margin-bottom: 20px; padding: 16px">
+      <div style="display: flex; gap: 10px; align-items: center">
+        <span style="font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.1em; color: rgba(22,34,76,0.7)">DOCUMENTS</span>
+        <span style="flex: 1; font-size: 12.5px; color: rgba(22,34,76,0.65)">
+          {{ uploadingDocument ? 'Uploading…' : stagedDocuments.length ? stagedDocuments.map((d) => d.filename).join(', ') : 'Manuals, receipts, certificates — optional.' }}
+        </span>
+        <label style="border: 1px solid var(--color-navy); background: transparent; cursor: pointer; padding: 7px 12px; font: 600 10.5px 'Archivo', sans-serif; letter-spacing: 0.08em; text-transform: uppercase">
+          Browse files
+          <input type="file" multiple :disabled="uploadingDocument" style="display: none" @change="handleDocumentInput" />
+        </label>
+      </div>
+    </div>
+
     <!-- Section 1: General -->
     <div style="background: #fff; border: 1px solid var(--color-navy)">
       <div style="background: var(--color-navy); color: var(--color-paper); padding: 9px 16px; display: flex; align-items: center; gap: 10px">
@@ -209,26 +248,6 @@ async function save(andAddAnother: boolean) {
         <div style="grid-column: span 3; display: flex; flex-direction: column; gap: 5px">
           <label style="font: 500 9.5px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.65)">NOTES</label>
           <textarea v-model="notes" rows="3" placeholder="Condition, provenance, missing parts, who I got it from…" style="padding: 9px 11px; border: 1px solid var(--color-navy); background: var(--color-paper); font-size: 13.5px; color: var(--color-navy); resize: vertical" />
-        </div>
-        <div style="grid-column: span 3; display: flex; gap: 10px; align-items: center; border: 1px dashed rgba(22,34,76,0.45); padding: 12px 14px">
-          <span style="font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.1em; color: rgba(22,34,76,0.7)">PHOTOS</span>
-          <span style="flex: 1; font-size: 12.5px; color: rgba(22,34,76,0.65)">
-            {{ uploading ? 'Uploading…' : stagedPhotos.length ? `${stagedPhotos.length} photo(s) attached — first becomes the card photo.` : 'Drop images here — first one becomes the card photo.' }}
-          </span>
-          <label style="border: 1px solid var(--color-navy); background: transparent; cursor: pointer; padding: 7px 12px; font: 600 10.5px 'Archivo', sans-serif; letter-spacing: 0.08em; text-transform: uppercase">
-            Browse files
-            <input type="file" accept="image/jpeg,image/png,image/webp" multiple :disabled="uploading" style="display: none" @change="handleFileInput" />
-          </label>
-        </div>
-        <div style="grid-column: span 3; display: flex; gap: 10px; align-items: center; border: 1px dashed rgba(22,34,76,0.45); padding: 12px 14px">
-          <span style="font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.1em; color: rgba(22,34,76,0.7)">DOCUMENTS</span>
-          <span style="flex: 1; font-size: 12.5px; color: rgba(22,34,76,0.65)">
-            {{ uploadingDocument ? 'Uploading…' : stagedDocuments.length ? stagedDocuments.map((d) => d.filename).join(', ') : 'Manuals, receipts, certificates — optional.' }}
-          </span>
-          <label style="border: 1px solid var(--color-navy); background: transparent; cursor: pointer; padding: 7px 12px; font: 600 10.5px 'Archivo', sans-serif; letter-spacing: 0.08em; text-transform: uppercase">
-            Browse files
-            <input type="file" multiple :disabled="uploadingDocument" style="display: none" @change="handleDocumentInput" />
-          </label>
         </div>
       </div>
     </div>

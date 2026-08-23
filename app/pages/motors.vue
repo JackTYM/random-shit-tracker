@@ -77,6 +77,7 @@ const CERT_OPTIONS = ['Certified', 'Collectable', 'Out of Certification'];
 
 const selectedClasses = ref<string[]>([]);
 const selectedCerts = ref<string[]>([]);
+const mobileFiltersOpen = ref(false);
 
 function toggleClass(cls: string) {
   const i = selectedClasses.value.indexOf(cls);
@@ -121,7 +122,7 @@ function certStyle(cert: string) {
       NO ROCKET MOTORS RECORDED YET
     </div>
 
-    <div v-else style="display: flex; gap: 24px; align-items: flex-start">
+    <div v-else class="rt-desktop-only" style="display: flex; gap: 24px; align-items: flex-start">
       <aside style="width: 250px; flex: none">
         <div style="background: var(--color-navy); color: var(--color-paper); padding: 9px 12px; font: 400 11px 'Archivo Black', sans-serif; letter-spacing: 0.1em">IMPULSE LADDER</div>
         <div style="background: #fff; border: 1px solid var(--color-navy); border-top: 0; padding: 12px">
@@ -221,6 +222,90 @@ function certStyle(cert: string) {
           </div>
         </div>
       </section>
+    </div>
+
+    <div v-if="motorItems.length > 0" class="rt-mobile-only">
+      <div style="background: var(--color-orange); border: 1px solid var(--color-navy); padding: 12px; margin-bottom: 12px">
+        <div style="font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.75)">TOTAL ON HAND</div>
+        <div style="font: 400 30px 'Archivo Black', sans-serif; line-height: 1.1">{{ totalOnHand }}</div>
+        <div style="font: 400 10px 'JetBrains Mono', monospace; color: rgba(22,34,76,0.8)">ACROSS {{ designationCount }} DESIGNATIONS</div>
+      </div>
+
+      <button
+        type="button"
+        style="width: 100%; border: 1px solid var(--color-navy); background: #fff; cursor: pointer; padding: 10px 12px; margin-bottom: 10px; min-height: 44px; font: 600 11px 'Archivo', sans-serif; letter-spacing: 0.08em; text-align: left"
+        @click="mobileFiltersOpen = !mobileFiltersOpen"
+      >
+        {{ mobileFiltersOpen ? 'HIDE FILTERS ▴' : 'FILTERS ▾' }}
+      </button>
+
+      <div v-if="mobileFiltersOpen" style="background: #fff; border: 1px solid var(--color-navy); padding: 12px; margin-bottom: 12px">
+        <div style="font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.1em; color: rgba(22,34,76,0.6); margin-bottom: 8px">IMPULSE CLASS</div>
+        <button
+          v-for="cls in availableClasses"
+          :key="cls"
+          type="button"
+          :style="{
+            width: '100%', textAlign: 'left', cursor: 'pointer', padding: '10px', marginBottom: '5px', minHeight: '44px',
+            display: 'flex', alignItems: 'center', gap: '10px',
+            border: `1px solid ${selectedClasses.includes(cls) ? 'var(--color-navy)' : 'rgba(22,34,76,0.3)'}`,
+            background: selectedClasses.includes(cls) ? 'var(--color-navy)' : 'transparent',
+            color: selectedClasses.includes(cls) ? 'var(--color-paper)' : 'var(--color-navy)',
+          }"
+          @click="toggleClass(cls)"
+        >
+          <span style="font: 400 16px 'Archivo Black', sans-serif; width: 38px; flex: none">{{ cls }}</span>
+          <span style="flex: 1; font: 400 10px 'JetBrains Mono', monospace; letter-spacing: 0.04em; opacity: 0.8">{{ classCounts.get(cls) ?? 0 }} ON HAND</span>
+        </button>
+        <div style="height: 1px; background: rgba(22,34,76,0.2); margin: 12px 0" />
+        <div style="font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.1em; color: rgba(22,34,76,0.6); margin-bottom: 8px">CERTIFICATION</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px">
+          <button
+            v-for="cert in CERT_OPTIONS"
+            :key="cert"
+            type="button"
+            :style="{
+              border: `1px solid ${selectedCerts.includes(cert) ? 'var(--color-navy)' : 'rgba(22,34,76,0.3)'}`,
+              background: selectedCerts.includes(cert) ? 'var(--color-navy)' : 'transparent',
+              color: selectedCerts.includes(cert) ? 'var(--color-paper)' : 'var(--color-navy)',
+              cursor: 'pointer', padding: '10px 12px', minHeight: '44px', font: `500 10px 'JetBrains Mono', monospace`, letterSpacing: '0.08em',
+            }"
+            @click="toggleCert(cert)"
+          >
+            {{ cert.toUpperCase() }}
+          </button>
+        </div>
+      </div>
+
+      <div style="font: 500 11px 'JetBrains Mono', monospace; letter-spacing: 0.08em; color: rgba(22,34,76,0.65); margin-bottom: 10px">{{ filteredCount }} ITEM{{ filteredCount === 1 ? '' : 'S' }} SHOWN · {{ filteredQty }} ON HAND</div>
+
+      <div v-if="filteredRows.length === 0" style="border: 1px dashed rgba(22,34,76,0.4); padding: 32px; text-align: center; font: 500 12px 'JetBrains Mono', monospace; letter-spacing: 0.08em; color: rgba(22,34,76,0.6)">
+        NO MOTORS MATCH THESE FILTERS
+      </div>
+
+      <div v-else style="display: flex; flex-direction: column; gap: 10px">
+        <div
+          v-for="r in filteredRows"
+          :key="r.id"
+          style="background: #fff; border: 1px solid var(--color-navy); padding: 12px 14px; cursor: pointer"
+          @click="navigateTo(`/items/${r.id}`)"
+        >
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 8px">
+            <span style="font: 400 15px 'Archivo Black', sans-serif; letter-spacing: 0.01em">{{ r.designation }}</span>
+            <span style="font: 700 13px 'JetBrains Mono', monospace">{{ r.cls || '—' }}</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; font: 400 12px 'JetBrains Mono', monospace; color: rgba(22,34,76,0.8)">
+            <div>DIA <strong style="color: var(--color-navy)">{{ r.dia }}</strong></div>
+            <div>QTY <strong style="color: var(--color-navy)">{{ r.qty }}</strong></div>
+            <div>{{ r.propellant }}</div>
+            <div>{{ r.type }}</div>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 8px; gap: 8px">
+            <span :style="{ display: 'inline-block', background: certStyle(r.cert).bg, color: certStyle(r.cert).fg, border: `1px solid ${certStyle(r.cert).border}`, padding: '3px 7px', font: `700 9px 'JetBrains Mono', monospace`, letterSpacing: '0.08em' }">{{ r.cert.toUpperCase() }}</span>
+            <span style="font: 500 10.5px 'JetBrains Mono', monospace; letter-spacing: 0.04em">▪ {{ r.location }}</span>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
 </template>

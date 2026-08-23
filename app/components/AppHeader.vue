@@ -63,6 +63,7 @@ async function handleSignOut() {
 }
 
 function toggleMobileAccount() {
+  mobileSearchExpanded.value = false;
   mobileAccountOpen.value = !mobileAccountOpen.value;
 }
 
@@ -117,9 +118,25 @@ function handleSearchBlur() {
 }
 
 function openMobileSearch() {
+  mobileAccountOpen.value = false;
   mobileSearchExpanded.value = true;
   nextTick(() => document.getElementById('header-search-input')?.focus());
 }
+
+// AppHeader is a layout-level component that persists across route changes (it isn't
+// remounted per page), so without this, navigating away while the mobile search box is
+// expanded with unsubmitted text would leave it open with stale text on top of every
+// subsequent page.
+watch(
+  () => route.path,
+  () => {
+    mobileSearchExpanded.value = false;
+    mobileAccountOpen.value = false;
+    searchQuery.value = '';
+    searchResults.value = [];
+    searchOpen.value = false;
+  },
+);
 </script>
 
 <template>

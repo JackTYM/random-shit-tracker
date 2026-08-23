@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, integer, boolean, index } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, integer, boolean, index, timestamp } from 'drizzle-orm/pg-core';
 import { crudPolicy, authenticatedRole } from 'drizzle-orm/neon';
 import { sql } from 'drizzle-orm';
 import { items } from './items';
@@ -14,6 +14,23 @@ export const itemPhotos = pgTable('item_photos', {
   isPrimary: boolean('is_primary').notNull().default(false),
 }, (table) => [
   index('item_photos_item_id_idx').on(table.itemId),
+  crudPolicy({
+    role: authenticatedRole,
+    read: sql`${isOwner(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+    modify: sql`${isOwner(table.ownerId)} AND ${ownsItem(table.itemId)}`,
+  }),
+]);
+
+export const itemDocuments = pgTable('item_documents', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  itemId: uuid('item_id').notNull().references(() => items.id, { onDelete: 'cascade' }),
+  ownerId: uuid('owner_id').notNull().default(ownerDefault),
+  r2Key: text('r2_key').notNull(),
+  url: text('url').notNull(),
+  filename: text('filename').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  index('item_documents_item_id_idx').on(table.itemId),
   crudPolicy({
     role: authenticatedRole,
     read: sql`${isOwner(table.ownerId)} AND ${ownsItem(table.itemId)}`,

@@ -297,14 +297,18 @@ async function handleAddDocument(e: Event) {
 }
 
 async function downloadDocument(doc: { url: string; filename: string }) {
-  const response = await fetch(doc.url);
-  const blob = await response.blob();
-  const blobUrl = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = blobUrl;
-  a.download = doc.filename;
-  a.click();
-  URL.revokeObjectURL(blobUrl);
+  try {
+    const response = await fetch(doc.url);
+    const blob = await response.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = doc.filename;
+    a.click();
+    URL.revokeObjectURL(blobUrl);
+  } catch (e: any) {
+    saveError.value = e?.message ?? 'Failed to download document.';
+  }
 }
 
 // --- Linking ---

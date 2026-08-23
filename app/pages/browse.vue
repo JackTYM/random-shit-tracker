@@ -216,7 +216,7 @@ function clearFilters() {
     </aside>
 
     <section style="flex: 1; min-width: 0">
-      <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; border-bottom: 3px solid var(--color-navy); padding-bottom: 10px; margin-bottom: 18px">
+      <div class="rt-browse-header-row" style="display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; border-bottom: 3px solid var(--color-navy); padding-bottom: 10px; margin-bottom: 18px">
         <div>
           <h1 style="margin: 0; font: 400 28px 'Archivo Black', sans-serif; letter-spacing: -0.01em; text-transform: uppercase">Browse collection</h1>
           <div style="font: 500 11px 'JetBrains Mono', monospace; letter-spacing: 0.08em; color: rgba(22,34,76,0.65); margin-top: 5px">{{ filteredItems.length }} OF {{ items.length }} ITEMS SHOWN</div>
@@ -266,6 +266,14 @@ function clearFilters() {
        section) to max-content instead of stretching it full-width, clipping the sort buttons
        and item cards at the right edge. */
     align-items: stretch !important;
+  }
+
+  /* The title and SORT-button group's combined min-content width (title min-content + gap +
+     sort group min-content) exceeds the 390px viewport on its own, independent of the section
+     sizing above — stacking them removes that fixed side-by-side width requirement. */
+  .rt-browse-header-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
   }
 
   .rt-browse-sidebar {

@@ -220,7 +220,7 @@ async function save(andAddAnother: boolean) {
         <span style="background: var(--color-orange); color: var(--color-navy); width: 19px; height: 19px; display: flex; align-items: center; justify-content: center; font: 400 11px 'Archivo Black', sans-serif">1</span>
         <span style="font: 400 11px 'Archivo Black', sans-serif; letter-spacing: 0.12em">GENERAL</span>
       </div>
-      <div style="padding: 18px 20px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px">
+      <div class="rt-additem-grid" style="padding: 18px 20px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px">
         <div style="grid-column: span 2; display: flex; flex-direction: column; gap: 5px">
           <label style="font: 500 9.5px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.65)">ITEM NAME</label>
           <input v-model="name" placeholder="e.g. Defender Space Probe" style="padding: 9px 11px; border: 1px solid var(--color-navy); background: var(--color-paper); font-size: 13.5px; color: var(--color-navy)" />
@@ -315,3 +315,11 @@ async function save(andAddAnother: boolean) {
     </div>
   </main>
 </template>
+
+<style scoped>
+@media (max-width: 768px) {
+  .rt-additem-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+</style>

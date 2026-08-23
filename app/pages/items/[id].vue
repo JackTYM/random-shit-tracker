@@ -402,7 +402,7 @@ onMounted(async () => {
     <p v-else-if="loadError" style="color: var(--color-rust)">{{ loadError }}</p>
 
     <template v-else-if="item">
-    <div style="display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 28px; align-items: start">
+    <div class="rt-detail-grid" style="display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 28px; align-items: start">
       <div>
         <div style="border: 1px solid var(--color-navy); background: #fff; height: 520px; overflow: hidden">
           <img v-if="primaryPhoto" :src="primaryPhoto.url" :alt="item.name" style="width: 100%; height: 100%; object-fit: contain; display: block; background: var(--color-paper)" />
@@ -410,7 +410,7 @@ onMounted(async () => {
             <span style="font: 500 11px 'JetBrains Mono', monospace; letter-spacing: 0.1em; color: rgba(22,34,76,0.5)">NO PHOTO YET</span>
           </div>
         </div>
-        <div v-if="photos.length > 1" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px">
+        <div v-if="photos.length > 1" class="rt-thumb-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px">
           <img
             v-for="p in photos.slice(0, 4)"
             :key="p.id"
@@ -451,7 +451,7 @@ onMounted(async () => {
             </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px">
+          <div class="rt-value-storage-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px">
             <div v-if="item.approx_value_usd" style="background: var(--color-orange); border: 1px solid var(--color-navy); padding: 14px 16px">
               <div style="font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.75)">APPROX. VALUE</div>
               <div style="font: 400 38px 'Archivo Black', sans-serif; line-height: 1.05; margin-top: 4px">${{ Number(item.approx_value_usd).toFixed(2) }}</div>
@@ -488,7 +488,7 @@ onMounted(async () => {
         </template>
 
         <template v-else>
-          <div style="background: #fff; border: 1px solid var(--color-navy); margin-top: 20px; padding: 18px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px">
+          <div class="rt-edit-grid" style="background: #fff; border: 1px solid var(--color-navy); margin-top: 20px; padding: 18px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px">
             <div style="grid-column: span 2; display: flex; flex-direction: column; gap: 5px">
               <label style="font: 500 9.5px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.65)">ITEM NAME</label>
               <input v-model="editName" style="padding: 9px 11px; border: 1px solid var(--color-navy); background: var(--color-paper); font-size: 13.5px; color: var(--color-navy)" />
@@ -575,7 +575,7 @@ onMounted(async () => {
       </div>
 
       <div v-if="showLinkPicker" style="position: fixed; inset: 0; background: rgba(22,34,76,0.5); display: flex; align-items: center; justify-content: center; z-index: 50" @click.self="closeLinkPicker">
-        <div style="background: #fff; border: 1px solid var(--color-navy); width: 420px; padding: 20px">
+        <div class="rt-link-modal" style="background: #fff; border: 1px solid var(--color-navy); width: 420px; padding: 20px">
           <div style="font: 400 14px 'Archivo Black', sans-serif; text-transform: uppercase; margin-bottom: 12px">Link another item</div>
           <input
             v-model="linkSearchQuery"
@@ -614,3 +614,21 @@ onMounted(async () => {
     </template>
   </main>
 </template>
+
+<style scoped>
+@media (max-width: 768px) {
+  .rt-detail-grid,
+  .rt-value-storage-grid,
+  .rt-edit-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .rt-thumb-grid {
+    grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)) !important;
+  }
+
+  .rt-link-modal {
+    width: calc(100vw - 32px) !important;
+  }
+}
+</style>

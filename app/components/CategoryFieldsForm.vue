@@ -24,7 +24,7 @@ function setOtherValue(key: string, value: string) {
 </script>
 
 <template>
-  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px">
+  <div class="rt-additem-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px">
     <div v-for="field in currentFields" :key="field.key" style="display: flex; flex-direction: column; gap: 5px">
       <label style="font: 500 9.5px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.65)">{{ field.label.toUpperCase() }}</label>
       <select
@@ -69,3 +69,11 @@ function setOtherValue(key: string, value: string) {
     </div>
   </div>
 </template>
+
+<style scoped>
+@media (max-width: 768px) {
+  .rt-additem-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+</style>

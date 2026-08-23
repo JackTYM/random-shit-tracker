@@ -206,6 +206,7 @@ function clearFilters() {
         </button>
         <button
           type="button"
+          class="rt-tap-target"
           style="width: 100%; margin-top: 16px; border: 1px dashed rgba(22,34,76,0.45); background: transparent; color: var(--color-navy); cursor: pointer; padding: 8px; font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.1em"
           @click="clearFilters"
         >

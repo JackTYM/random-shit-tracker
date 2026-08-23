@@ -318,8 +318,17 @@ async function save(andAddAnother: boolean) {
 
 <style scoped>
 @media (max-width: 768px) {
+  /* !important beats the elements' own inline `style` attributes (the app-wide convention —
+     see app/assets/css/main.css). grid-column: auto is also needed: redefining the explicit
+     grid-template-columns alone doesn't stop a `grid-column: span 2/3` child from creating its
+     own implicit tracks, which would keep that field multi-column-wide even after collapsing
+     the grid to one column. */
   .rt-additem-grid {
     grid-template-columns: 1fr !important;
+  }
+
+  .rt-additem-grid > * {
+    grid-column: auto !important;
   }
 }
 </style>

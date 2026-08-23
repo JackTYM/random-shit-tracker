@@ -617,10 +617,20 @@ onMounted(async () => {
 
 <style scoped>
 @media (max-width: 768px) {
+  /* !important beats the elements' own inline `style` attributes (the app-wide convention —
+     see app/assets/css/main.css). */
   .rt-detail-grid,
   .rt-value-storage-grid,
   .rt-edit-grid {
     grid-template-columns: 1fr !important;
+  }
+
+  /* .rt-edit-grid has children using grid-column: span 2 (Item Name, Notes) — redefining the
+     explicit grid-template-columns alone doesn't stop a spanning child from creating its own
+     implicit tracks, which would keep that field multi-column-wide even after collapsing the
+     grid to one column. */
+  .rt-edit-grid > * {
+    grid-column: auto !important;
   }
 
   .rt-thumb-grid {

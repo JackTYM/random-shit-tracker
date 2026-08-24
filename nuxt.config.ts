@@ -37,7 +37,6 @@ export default defineNuxtConfig({
   css: ['~/assets/css/tokens.css', '~/assets/css/main.css'],
   pwa: {
     registerType: 'autoUpdate',
-    includeAssets: ['favicon.ico', 'apple-touch-icon-180x180.png'],
     manifest: {
       name: 'RandomShitTracker',
       short_name: 'RST',

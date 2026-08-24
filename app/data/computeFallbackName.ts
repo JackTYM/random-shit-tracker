@@ -11,7 +11,10 @@ export function computeFallbackName(
     return combined || CATEGORY_LABELS.motor || 'Untitled Item';
   }
   if (category === 'part') {
-    const partCategory = (categoryFields.p_part_category as string) || '';
+    let partCategory = (categoryFields.p_part_category as string) || '';
+    if (partCategory === 'Other') {
+      partCategory = (categoryFields.p_part_category_other as string) || partCategory;
+    }
     const partNumber = (categoryFields.p_part_number as string) || '';
     if (partCategory && partNumber) return `${partCategory} — ${partNumber}`;
     return partCategory || partNumber || CATEGORY_LABELS.part || 'Untitled Item';

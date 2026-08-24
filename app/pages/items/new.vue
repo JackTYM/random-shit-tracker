@@ -81,10 +81,11 @@ async function handleDocumentInput(e: Event) {
   }
 }
 
-function buildCategoryFieldPayload(fields: { key: string; type: string; otherKey?: string }[]): Record<string, unknown> {
+function buildCategoryFieldPayload(fields: { key: string; type: string; otherKey?: string; showWhen?: { field: string; equals: string } }[]): Record<string, unknown> {
   const payload: Record<string, unknown> = {};
   for (const field of fields) {
-    let value: unknown = categoryValues.value[field.key] ?? null;
+    const hidden = !!field.showWhen && categoryValues.value[field.showWhen.field] !== field.showWhen.equals;
+    let value: unknown = hidden ? null : (categoryValues.value[field.key] ?? null);
     if (field.type === 'number') {
       value = value === '' || value === null || value === undefined ? null : Number(value);
     } else if (value === '') {

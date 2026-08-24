@@ -131,7 +131,8 @@ function buildEditCategoryPayload(): Record<string, unknown> {
   const config = CATEGORY_FORM_FIELDS[item.value.category] ?? [];
   const payload: Record<string, unknown> = {};
   for (const field of config) {
-    let value: unknown = editCategoryValues.value[field.key] ?? null;
+    const hidden = !!field.showWhen && editCategoryValues.value[field.showWhen.field] !== field.showWhen.equals;
+    let value: unknown = hidden ? null : (editCategoryValues.value[field.key] ?? null);
     if (field.type === 'number') {
       value = value === '' || value === null || value === undefined ? null : Number(value);
     } else if (value === '') {

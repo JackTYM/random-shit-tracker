@@ -12,7 +12,10 @@ const emit = defineEmits<{
   'update:otherValues': [Record<string, string>];
 }>();
 
-const currentFields = computed(() => CATEGORY_FORM_FIELDS[props.category] ?? []);
+const currentFields = computed(() => {
+  const fields = CATEGORY_FORM_FIELDS[props.category] ?? [];
+  return fields.filter((f) => !f.showWhen || props.values[f.showWhen.field] === f.showWhen.equals);
+});
 
 function setValue(key: string, value: string) {
   emit('update:values', { ...props.values, [key]: value });

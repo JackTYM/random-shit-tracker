@@ -6,6 +6,7 @@ export interface CategoryFormField {
   type: FormFieldType;
   options?: string[];
   otherKey?: string;
+  showWhen?: { field: string; equals: string };
 }
 
 export const CATEGORY_LABELS: Record<string, string> = {
@@ -48,7 +49,7 @@ export const CATEGORY_FORM_FIELDS: Record<string, CategoryFormField[]> = {
     { key: 'p_print_category', label: 'Category', type: 'select', options: ['Book', 'Catalogue', 'Newsletter', 'Model Plan', 'Educational Material', 'Scale Data', 'Advertising Material'] },
     { key: 'p_year', label: 'Year', type: 'number' },
     { key: 'p_volume_or_issue', label: 'Volume / Issue #', type: 'text' },
-    { key: 'p_kit_number', label: 'Kit #', type: 'text' },
+    { key: 'p_kit_number', label: 'Kit #', type: 'text', showWhen: { field: 'p_print_category', equals: 'Model Plan' } },
   ],
   other: [
     { key: 'p_type', label: 'Type', type: 'text' },

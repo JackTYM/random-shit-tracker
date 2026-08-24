@@ -1,3 +1,5 @@
+import { computeFallbackName } from '~/data/computeFallbackName';
+
 export interface SharedItemFields {
   name: string;
   manufacturerOrClub: string | null;
@@ -34,8 +36,10 @@ export function useCreateItem() {
     const fnName = RPC_BY_CATEGORY[category];
     if (!fnName) throw new Error(`Unknown category: ${category}`);
 
+    const name = shared.name.trim() || computeFallbackName(category, shared, categoryFields);
+
     const { data: itemId, error } = await client.rpc(fnName, {
-      p_name: shared.name,
+      p_name: name,
       p_manufacturer_or_club: shared.manufacturerOrClub,
       p_storage_location: shared.storageLocation,
       p_storage_note: shared.storageNote,

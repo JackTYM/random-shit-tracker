@@ -1,4 +1,5 @@
 import type { SharedItemFields } from './useCreateItem';
+import { computeFallbackName } from '~/data/computeFallbackName';
 
 export type UpdateSharedFields = SharedItemFields;
 
@@ -23,10 +24,12 @@ export function useUpdateItem() {
     const table = CATEGORY_TABLE[category];
     if (!table) throw new Error(`Unknown category: ${category}`);
 
+    const name = shared.name.trim() || computeFallbackName(category, shared, categoryFields);
+
     const { error: itemsError } = await client
       .from('items')
       .update({
-        name: shared.name,
+        name,
         manufacturer_or_club: shared.manufacturerOrClub,
         storage_location: shared.storageLocation,
         storage_note: shared.storageNote,

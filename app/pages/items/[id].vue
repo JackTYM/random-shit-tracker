@@ -2,6 +2,8 @@
 import { CATEGORY_FORM_FIELDS, CATEGORY_LABELS } from '~/data/categoryFormFields';
 import { formatItemDetailAge } from '~/data/valueAge';
 
+const NAME_REQUIRED_CATEGORIES = new Set(['plane', 'kit', 'print']);
+
 const route = useRoute();
 const itemId = route.params.id as string;
 
@@ -148,7 +150,7 @@ function buildEditCategoryPayload(): Record<string, unknown> {
 
 async function saveEdit() {
   if (!item.value) return;
-  if (!editName.value.trim()) {
+  if (NAME_REQUIRED_CATEGORIES.has(item.value.category) && !editName.value.trim()) {
     saveError.value = 'Item name is required.';
     return;
   }

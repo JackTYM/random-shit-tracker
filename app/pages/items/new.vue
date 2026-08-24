@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { CATEGORY_LABELS, CATEGORY_FORM_FIELDS } from '~/data/categoryFormFields';
 
+const NAME_REQUIRED_CATEGORIES = new Set(['plane', 'kit', 'print']);
+
 const { createItem } = useCreateItem();
 const { uploadPhoto } = useUploadPhoto();
 const { uploadDocument } = useUploadDocument();
@@ -116,12 +118,12 @@ function resetForm() {
 
 async function save(andAddAnother: boolean) {
   error.value = '';
-  if (!name.value.trim()) {
-    error.value = 'Item name is required.';
-    return;
-  }
   if (!selectedCategory.value) {
     error.value = 'Pick a category.';
+    return;
+  }
+  if (NAME_REQUIRED_CATEGORIES.has(selectedCategory.value) && !name.value.trim()) {
+    error.value = 'Item name is required.';
     return;
   }
   saving.value = true;

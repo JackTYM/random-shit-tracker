@@ -42,7 +42,10 @@ export const CATEGORY_FORM_FIELDS: Record<string, CategoryFormField[]> = {
     { key: 'p_part_category', label: 'Part Category', type: 'select', options: ['Nose Cone', 'Fin Unit', 'Transition', 'Coupler', 'Centering Ring', 'Nose Block', 'Body Tube', 'Parachute', 'Other'], otherKey: 'p_part_category_other' },
     { key: 'p_part_number', label: 'Part Number', type: 'text' },
     { key: 'p_material', label: 'Material', type: 'select', options: ['Plastic', 'Balsa', 'Other'], otherKey: 'p_material_other' },
-    { key: 'p_diameter', label: 'Diameter', type: 'text' },
+    { key: 'p_diameter_type', label: 'Diameter Type', type: 'select', options: ['Measurement', 'Tube Code'] },
+    { key: 'p_diameter_value', label: 'Diameter Value', type: 'number', showWhen: { field: 'p_diameter_type', equals: 'Measurement' } },
+    { key: 'p_diameter_unit', label: 'Unit', type: 'select', options: ['mm', 'in'], showWhen: { field: 'p_diameter_type', equals: 'Measurement' } },
+    { key: 'p_diameter_code', label: 'Tube Code', type: 'text', showWhen: { field: 'p_diameter_type', equals: 'Tube Code' } },
     { key: 'p_origin', label: 'Origin', type: 'select', options: ["Manufacturer's Part", 'Custom'] },
   ],
   print: [

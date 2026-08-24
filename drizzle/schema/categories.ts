@@ -67,6 +67,8 @@ export const partCategoryEnum = pgEnum('part_category', [
 ]);
 export const partMaterialEnum = pgEnum('part_material', ['Plastic', 'Balsa', 'Other']);
 export const partOriginEnum = pgEnum('part_origin', ["Manufacturer's Part", 'Custom']);
+export const partDiameterTypeEnum = pgEnum('part_diameter_type', ['Measurement', 'Tube Code']);
+export const partDiameterUnitEnum = pgEnum('part_diameter_unit', ['mm', 'in']);
 
 export const modelRocketParts = pgTable('model_rocket_parts', {
   itemId: uuid('item_id').primaryKey().references(() => items.id, { onDelete: 'cascade' }),
@@ -76,7 +78,10 @@ export const modelRocketParts = pgTable('model_rocket_parts', {
   partNumber: text('part_number'),
   material: partMaterialEnum('material'),
   materialOther: text('material_other'),
-  diameter: text('diameter'),
+  diameterType: partDiameterTypeEnum('diameter_type'),
+  diameterValue: numeric('diameter_value'),
+  diameterUnit: partDiameterUnitEnum('diameter_unit'),
+  diameterCode: text('diameter_code'),
   origin: partOriginEnum('origin'),
 }, (table) => [
   crudPolicy({

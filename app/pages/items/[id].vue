@@ -3,6 +3,7 @@ import { CATEGORY_FORM_FIELDS, CATEGORY_LABELS } from '~/data/categoryFormFields
 import { formatItemDetailAge } from '~/data/valueAge';
 
 const NAME_REQUIRED_CATEGORIES = new Set(['plane', 'kit', 'print']);
+const DIAMETER_AUX_KEYS = new Set(['p_diameter_type', 'p_diameter_unit', 'p_diameter_code']);
 
 const route = useRoute();
 const itemId = route.params.id as string;
@@ -67,7 +68,14 @@ const detailFields = computed(() => {
   if (!detail) return [];
   const config = CATEGORY_FORM_FIELDS[item.value.category] ?? [];
   return config
+    .filter((f) => !DIAMETER_AUX_KEYS.has(f.key))
     .map((f) => {
+      if (f.key === 'p_diameter_value') {
+        const value = detail.diameter_type === 'Tube Code'
+          ? detail.diameter_code
+          : detail.diameter_value != null ? `${detail.diameter_value}${detail.diameter_unit ?? ''}` : null;
+        return { label: 'Diameter', value };
+      }
       const columnKey = f.key.replace(/^p_/, '');
       let value = detail[columnKey];
       if (value === 'Other' && f.otherKey) {

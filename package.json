@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@neondatabase/neon-js": "^0.7.0-beta",
+    "@vite-pwa/nuxt": "^1.1.1",
     "aws4fetch": "^1.0.20",
     "drizzle-orm": "^0.45.2",
     "jose": "^6.2.9",

@@ -53,20 +53,40 @@ export default defineNuxtConfig({
       ],
     },
     workbox: {
-      // @vite-pwa/nuxt's default (non-dev) manifestTransform strips the `.html` extension off
-      // every precached HTML entry (offline.html -> "offline"), to mirror how prerendered/static
-      // Nuxt builds serve clean URLs. navigateFallback must match that transformed precache key
-      // (not the on-disk filename), or createHandlerBoundToURL's cache lookup misses entirely.
-      navigateFallback: '/offline',
+      // Explicitly `null` (not simply omitted) — @vite-pwa/nuxt defaults `navigateFallback` to
+      // the app's baseURL ("/") whenever the key is absent from this object entirely, which
+      // would silently reintroduce the exact bug described below (just bound to "/" instead of
+      // "/offline"). Setting it to a falsy value here both satisfies @vite-pwa/nuxt's
+      // `"navigateFallback" in options.workbox` presence check (so it won't inject its own
+      // default) and workbox-build's own `if (navigateFallback)` template guard (so no
+      // NavigationRoute is generated at all).
+      //
+      // NOTE: deliberately NOT using `navigateFallback` here. It registers a Workbox
+      // NavigationRoute with the default allowlist ([/./], i.e. "match every navigation"),
+      // whose handler (createHandlerBoundToURL) is a precache-only lookup that never attempts
+      // a network fetch. For an SSR app that means EVERY page navigation — even while fully
+      // online — would be answered with the precached /offline shell instead of the real
+      // server-rendered page. Confirmed empirically: with this service worker active and the
+      // network fully up, reloading /login rendered the offline.html fallback text, not the
+      // real login page. Instead, the `runtimeCaching` entry below matches navigation requests
+      // explicitly with `NetworkOnly` + `precacheFallback`, which always tries the network
+      // first and only serves the precached /offline page if that fetch genuinely fails.
+      //
       // Explicit glob (not the module's default) because this project's SSR `cloudflare_module`
       // nitro preset doesn't auto-enable shell precaching the way static/prerendered builds do —
       // without this, the service worker would only precache build-metadata JSON, not the actual
-      // app JS/CSS/HTML. Includes `html` so `offline.html` (the navigateFallback target above)
-      // is actually precached — Workbox's navigateFallback throws if its target isn't precached,
-      // which silently prevents ALL subsequent registerRoute calls (including the two
-      // network-only runtime-caching rules below) from ever registering.
+      // app JS/CSS/HTML. Includes `html` so `offline.html` (the precacheFallback target below)
+      // is actually precached — `precacheFallback` throws if its target isn't precached.
+      navigateFallback: null,
       globPatterns: ['**/*.{js,css,html}'],
       runtimeCaching: [
+        {
+          urlPattern: ({ request }) => request.mode === 'navigate',
+          handler: 'NetworkOnly',
+          options: {
+            precacheFallback: { fallbackURL: '/offline' },
+          },
+        },
         {
           urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
           handler: 'NetworkOnly',

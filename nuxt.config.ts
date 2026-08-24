@@ -53,8 +53,19 @@ export default defineNuxtConfig({
       ],
     },
     workbox: {
-      navigateFallback: '/offline.html',
-      globPatterns: ['**/*.{js,css}'],
+      // @vite-pwa/nuxt's default (non-dev) manifestTransform strips the `.html` extension off
+      // every precached HTML entry (offline.html -> "offline"), to mirror how prerendered/static
+      // Nuxt builds serve clean URLs. navigateFallback must match that transformed precache key
+      // (not the on-disk filename), or createHandlerBoundToURL's cache lookup misses entirely.
+      navigateFallback: '/offline',
+      // Explicit glob (not the module's default) because this project's SSR `cloudflare_module`
+      // nitro preset doesn't auto-enable shell precaching the way static/prerendered builds do —
+      // without this, the service worker would only precache build-metadata JSON, not the actual
+      // app JS/CSS/HTML. Includes `html` so `offline.html` (the navigateFallback target above)
+      // is actually precached — Workbox's navigateFallback throws if its target isn't precached,
+      // which silently prevents ALL subsequent registerRoute calls (including the two
+      // network-only runtime-caching rules below) from ever registering.
+      globPatterns: ['**/*.{js,css,html}'],
       runtimeCaching: [
         {
           urlPattern: ({ url }) => url.pathname.startsWith('/api/'),

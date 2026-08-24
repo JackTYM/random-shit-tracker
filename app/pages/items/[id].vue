@@ -73,7 +73,7 @@ const detailFields = computed(() => {
       if (f.key === 'p_diameter_value') {
         const value = detail.diameter_type === 'Tube Code'
           ? detail.diameter_code
-          : detail.diameter_value != null ? `${detail.diameter_value}${detail.diameter_unit ?? ''}` : null;
+          : detail.diameter_value != null ? `${detail.diameter_value}${detail.diameter_unit ? ' ' + detail.diameter_unit : ''}` : null;
         return { label: 'Diameter', value };
       }
       const columnKey = f.key.replace(/^p_/, '');

@@ -12,7 +12,6 @@ export default defineNuxtConfig({
     r2SecretAccessKey: '',
     r2Bucket: '',
     public: {
-      neonBaseUrl: '',
       neonAuthUrl: '',
       neonDataApiUrl: '',
       r2PublicBaseUrl: '',
@@ -89,6 +88,12 @@ export default defineNuxtConfig({
         },
         {
           urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
+          handler: 'NetworkOnly',
+        },
+        {
+          // Our own same-origin Neon Auth proxy (server/routes/auth/[...path].ts) —
+          // never cache, same reasoning as /api/* above.
+          urlPattern: ({ url }) => url.pathname.startsWith('/auth/'),
           handler: 'NetworkOnly',
         },
         {

@@ -12,7 +12,15 @@ let _client: ReturnType<typeof createClient> | null = null;
 export function useNeonClient() {
   if (!_client) {
     const config = useRuntimeConfig();
-    _client = createClient(config.public.neonBaseUrl);
+    _client = createClient({
+      // Same-origin proxy (server/routes/auth/[...path].ts) instead of Neon's own auth
+      // domain directly -- see that file's comment for why. The Data API doesn't need
+      // this: it authenticates via an explicit `Authorization: Bearer <jwt>` header, not
+      // a browser-managed cookie, so it isn't subject to the same cross-site restrictions
+      // and can keep talking to Neon's own domain directly.
+      auth: { url: '/auth' },
+      dataApi: { url: config.public.neonDataApiUrl },
+    });
   }
   return _client;
 }

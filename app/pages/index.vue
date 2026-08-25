@@ -13,12 +13,20 @@ const loading = ref(true);
 const loadError = ref('');
 const primaryPhotoByItem = ref<Record<string, string>>({});
 
-async function load() {
+async function load(isRetry = false) {
   loading.value = true;
   loadError.value = '';
   try {
     items.value = await listItems();
   } catch (e: any) {
+    // A one-time OAuth session-verifier race (see the pending-gate comment below) can
+    // still surface here as a transient failure on the very first load right after a
+    // Google sign-in redirect -- a second attempt always succeeds once the exchange
+    // has settled. Retry silently once before showing the user an error.
+    if (!isRetry) {
+      await load(true);
+      return;
+    }
     loadError.value = e?.message ?? 'Failed to load items.';
     loading.value = false;
     return;

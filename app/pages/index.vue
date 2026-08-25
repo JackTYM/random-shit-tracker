@@ -4,7 +4,7 @@ import type { ItemRecord } from '~/composables/useItems';
 import { formatDashboardAge, monthsSince, STALE_MONTHS } from '~/data/valueAge';
 import { orderImpulseClasses } from '~/data/impulseLadder';
 
-const { session, signOut } = useAuth();
+const { session, signOut, pending } = useAuth();
 const { listItems, categoryDetail } = useItems();
 const { fetchPrimaryPhotos } = usePrimaryPhotos();
 
@@ -33,7 +33,27 @@ async function load() {
   loading.value = false;
 }
 
-onMounted(load);
+onMounted(async () => {
+  // Wait for the auth middleware's own session check to settle before making any
+  // Data API call. The Data API client fetches a fresh JWT via getJWTToken() ->
+  // getSession() internally, independent of useAuth()'s refresh() -- if that fires
+  // while a one-time `neon_auth_session_verifier` (from an OAuth redirect) is still
+  // in the URL and the middleware's own getSession() call hasn't resolved yet, both
+  // requests race to consume the same single-use verifier and the loser gets a 400.
+  // Waiting for `pending` to clear guarantees the middleware's call has already
+  // finished (and stripped the verifier from the URL) before this one fires.
+  if (pending.value) {
+    await new Promise<void>((resolve) => {
+      const stop = watch(pending, (isPending) => {
+        if (!isPending) {
+          stop();
+          resolve();
+        }
+      });
+    });
+  }
+  await load();
+});
 
 async function handleSignOut() {
   await signOut();

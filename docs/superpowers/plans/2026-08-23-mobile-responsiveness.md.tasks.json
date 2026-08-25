@@ -1,0 +1,49 @@
+{
+  "planPath": "docs/superpowers/plans/2026-08-23-mobile-responsiveness.md",
+  "tasks": [
+    {
+      "id": 0,
+      "subject": "Task 1: Global responsive utility classes and small CSS fixes",
+      "status": "pending",
+      "blockedBy": [],
+      "activeForm": "Adding global responsive utilities and CSS fixes"
+    },
+    {
+      "id": 1,
+      "subject": "Task 2: Header — mobile bottom tab bar, collapsing search, account sheet",
+      "status": "pending",
+      "blockedBy": [0],
+      "activeForm": "Building mobile header/bottom-nav"
+    },
+    {
+      "id": 2,
+      "subject": "Task 3: Motors — card list on mobile",
+      "status": "pending",
+      "blockedBy": [0],
+      "activeForm": "Building Motors mobile card list"
+    },
+    {
+      "id": 3,
+      "subject": "Task 4: Dashboard, Browse, and Search — responsive grids",
+      "status": "pending",
+      "blockedBy": [0],
+      "activeForm": "Making Dashboard/Browse/Search responsive"
+    },
+    {
+      "id": 4,
+      "subject": "Task 5: Item Detail, Add Item, and CategoryFieldsForm — responsive grids",
+      "status": "pending",
+      "blockedBy": [0],
+      "activeForm": "Making Item Detail/Add Item/CategoryFieldsForm responsive"
+    },
+    {
+      "id": 5,
+      "subject": "Task 6: End-to-end live verification",
+      "status": "pending",
+      "blockedBy": [1, 2, 3, 4],
+      "activeForm": "Running end-to-end live verification",
+      "userGate": true
+    }
+  ],
+  "lastUpdated": "2026-08-23T00:00:00Z"
+}

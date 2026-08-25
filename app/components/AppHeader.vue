@@ -6,7 +6,7 @@ const { session, signOut } = useAuth();
 const { searchItems } = useSearchItems();
 const route = useRoute();
 
-const BROWSE_FAMILY = ['browse', 'motors', 'storage', 'search'];
+const BROWSE_FAMILY = ['browse', 'storage', 'search'];
 
 function isDetailRoute(path: string): boolean {
   return path !== '/items/new' && /^\/items\/[^/]+$/.test(path);
@@ -16,7 +16,6 @@ function currentScreen(): string {
   const path = route.path;
   if (path === '/') return 'dash';
   if (path === '/browse') return 'browse';
-  if (path === '/motors') return 'motors';
   if (path === '/storage') return 'storage';
   if (path === '/search') return 'search';
   if (isDetailRoute(path)) return 'detail';
@@ -37,7 +36,6 @@ const viewTabs = computed(() => {
   const screen = currentScreen();
   return [
     { label: 'All items', to: '/browse', action: undefined, active: screen === 'browse' },
-    { label: 'Motors', to: '/motors', action: undefined, active: screen === 'motors' },
     { label: 'Storage', to: '/storage', action: undefined, active: screen === 'storage' },
     { label: 'Search', to: '/search', action: undefined, active: screen === 'search' },
   ];
@@ -48,7 +46,6 @@ const bottomBarItems = computed(() => {
   return [
     { label: 'DASH', to: '/', active: screen === 'dash' },
     { label: 'ALL', to: '/browse', active: screen === 'browse' || screen === 'detail' },
-    { label: 'MOTORS', to: '/motors', active: screen === 'motors' },
     { label: 'BINS', to: '/storage', active: screen === 'storage' },
     { label: 'FIND', to: '/search', active: screen === 'search' },
   ];

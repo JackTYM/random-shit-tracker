@@ -53,14 +53,21 @@ export function useAuth() {
   }
 
   async function signInEmail(email: string, password: string) {
+    // Use the session this response already returns instead of a separate getSession()
+    // round trip: in an iOS home-screen standalone PWA's isolated storage, that extra
+    // request can race ahead of the session cookie actually being persisted and come
+    // back empty, silently leaving the user looking signed-out even though sign-in
+    // itself succeeded.
     const result = await client.auth.signIn.email({ email, password });
-    await refresh();
+    if (result.data) session.value = result.data;
+    pending.value = false;
     return result;
   }
 
   async function signUpEmail(email: string, password: string, name: string) {
     const result = await client.auth.signUp.email({ email, password, name });
-    await refresh();
+    if (result.data) session.value = result.data;
+    pending.value = false;
     return result;
   }
 

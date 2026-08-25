@@ -12,14 +12,16 @@ let _client: ReturnType<typeof createClient> | null = null;
 export function useNeonClient() {
   if (!_client) {
     const config = useRuntimeConfig();
-    // createClient validates its auth URL at construction time, and this composable is
-    // called unconditionally by useAuth() in components that also render during SSR (e.g.
-    // AppHeader.vue) — even though no auth *method* is ever called server-side (see the
-    // singleton warning above), the client still gets *constructed* there, so a bare
-    // relative '/auth' throws ("Invalid base URL") during SSR. It resolves fine client-side
-    // (fetch() resolves relative URLs against the page origin), so only the server needs an
-    // absolute one, built from the current request's own origin.
-    const authUrl = import.meta.server ? `${useRequestURL().origin}/auth` : '/auth';
+    // The underlying better-auth client validates its auth URL at construction time via
+    // `new URL(url)` with no base — a bare relative '/auth' throws ("Invalid base URL")
+    // unconditionally, client-side included. (Confirmed against a working reference
+    // implementation's own code comment: "the SDK requires an absolute URL, so resolve it
+    // against the current origin here rather than baking a fixed domain in at build time.")
+    // So both branches need a real absolute URL: server-side from the current request's
+    // own origin, client-side from window.location.
+    const authUrl = import.meta.server
+      ? `${useRequestURL().origin}/auth`
+      : new URL('/auth', window.location.origin).toString();
     _client = createClient({
       // Same-origin proxy (server/routes/auth/[...path].ts) instead of Neon's own auth
       // domain directly -- see that file's comment for why. The Data API doesn't need

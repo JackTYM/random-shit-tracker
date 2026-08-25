@@ -9,6 +9,17 @@ import { createClient } from '@neondatabase/neon-js';
 // adding any SSR-side auth call, this needs to become per-request state instead.
 let _client: ReturnType<typeof createClient> | null = null;
 
+async function fetchDataApiJwt(authUrl: string): Promise<string | null> {
+  try {
+    const res = await fetch(`${authUrl}/token`, { credentials: 'include' });
+    if (!res.ok) return null;
+    const { token } = (await res.json()) as { token?: string };
+    return token ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export function useNeonClient() {
   if (!_client) {
     const config = useRuntimeConfig();
@@ -22,6 +33,7 @@ export function useNeonClient() {
     const authUrl = import.meta.server
       ? `${useRequestURL().origin}/auth`
       : new URL('/auth', window.location.origin).toString();
+
     _client = createClient({
       // Same-origin proxy (server/routes/auth/[...path].ts) instead of Neon's own auth
       // domain directly -- see that file's comment for why. The Data API doesn't need
@@ -31,6 +43,21 @@ export function useNeonClient() {
       auth: { url: authUrl },
       dataApi: { url: config.public.neonDataApiUrl },
     });
+
+    // The Data API portion of the client above derives its Bearer token via the Neon Auth
+    // SDK's internal getJWTToken(), which only trusts a JWT injected from a `set-auth-jwt`
+    // response header on a session call -- Neon's real responses never carry that header
+    // for this project (confirmed directly against the upstream API), so it always falls
+    // back to the plain, non-JWT opaque session token and every Data API call fails with
+    // AuthRequiredError. GET /auth/token (proxied same-origin) reliably returns a real,
+    // valid JWT, so bypass the SDK's broken internal derivation for the Data API
+    // specifically via its documented custom-token-provider mode -- this returns a plain
+    // NeonPostgrestClient with no `.auth` of its own, so only its `.from` is grafted onto
+    // the auth-integrated client above; every other method (`.auth.*`) is untouched.
+    const dataApiClient = createClient({
+      dataApi: { url: config.public.neonDataApiUrl, getToken: () => fetchDataApiJwt(authUrl) },
+    });
+    _client.from = dataApiClient.from.bind(dataApiClient);
   }
   return _client;
 }

@@ -16,9 +16,34 @@ export function useAuth() {
   async function refresh() {
     if (refreshPromise.value) return refreshPromise.value;
     refreshPromise.value = (async () => {
-      const { data } = await client.auth.getSession();
-      session.value = data ?? null;
-      pending.value = false;
+      try {
+        const { data } = await client.auth.getSession();
+        session.value = data ?? null;
+      } catch (err) {
+        // A getSession() call made while a one-time `neon_auth_session_verifier` is
+        // still in the URL can fail (e.g. if something else already consumed it -- see
+        // the dedup comment above). The verifier is single-use, so retrying it won't
+        // help; strip it and fall back to a normal cookie-based session check, which
+        // succeeds if the server-side OAuth exchange actually completed. Without this,
+        // an uncaught rejection here crashes app init (Nuxt's app:error / NUXT_E1005)
+        // and leaves `pending` stuck at true forever.
+        const hasVerifier = typeof window !== 'undefined' && window.location.search.includes('neon_auth_session_verifier');
+        if (hasVerifier) {
+          const url = new URL(window.location.href);
+          url.searchParams.delete('neon_auth_session_verifier');
+          window.history.replaceState(window.history.state, '', url.href);
+          try {
+            const { data } = await client.auth.getSession();
+            session.value = data ?? null;
+          } catch {
+            session.value = null;
+          }
+        } else {
+          session.value = null;
+        }
+      } finally {
+        pending.value = false;
+      }
     })();
     try {
       await refreshPromise.value;

@@ -19,11 +19,19 @@ async function load(isRetry = false) {
   try {
     items.value = await listItems();
   } catch (e: any) {
-    // A one-time OAuth session-verifier race (see the pending-gate comment below) can
-    // still surface here as a transient failure on the very first load right after a
-    // Google sign-in redirect -- a second attempt always succeeds once the exchange
-    // has settled. Retry silently once before showing the user an error.
+    // A one-time OAuth `neon_auth_session_verifier` can still be sitting in the URL
+    // when this fires (e.g. it never got consumed because the auth server rejected
+    // it), and the Data API's own internal getSession() call keeps reading and
+    // resending that same dead token on every attempt as long as it's still in the
+    // URL -- retrying in place never helps. Stripping it (like a normal navigation to
+    // another page and back would, which drops the query string) makes the next
+    // attempt fall back to the plain cookie-based session check, which already works.
     if (!isRetry) {
+      if (window.location.search.includes('neon_auth_session_verifier')) {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('neon_auth_session_verifier');
+        window.history.replaceState(window.history.state, '', url.href);
+      }
       await load(true);
       return;
     }

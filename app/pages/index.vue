@@ -243,8 +243,8 @@ const staleList = computed(() => {
       </div>
     </template>
 
-    <div style="margin-top: 32px; display: flex; align-items: center; gap: 12px">
-      <span style="font: 500 11px 'JetBrains Mono', monospace; letter-spacing: 0.08em; color: rgba(22,34,76,0.65)">Signed in as {{ session?.user?.email }}</span>
+    <div v-if="session?.user" style="margin-top: 32px; display: flex; align-items: center; gap: 12px">
+      <span style="font: 500 11px 'JetBrains Mono', monospace; letter-spacing: 0.08em; color: rgba(22,34,76,0.65)">Signed in as {{ session.user.email }}</span>
       <button
         type="button"
         style="border: 1px solid var(--color-navy); background: transparent; cursor: pointer; padding: 8px 12px; font: 600 11px 'Archivo', sans-serif; letter-spacing: 0.06em"

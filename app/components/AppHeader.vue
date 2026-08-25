@@ -44,10 +44,10 @@ const viewTabs = computed(() => {
 const bottomBarItems = computed(() => {
   const screen = currentScreen();
   return [
-    { label: 'DASH', to: '/', active: screen === 'dash' },
-    { label: 'ALL', to: '/browse', active: screen === 'browse' || screen === 'detail' },
-    { label: 'BINS', to: '/storage', active: screen === 'storage' },
-    { label: 'FIND', to: '/search', active: screen === 'search' },
+    { key: 'dash', label: 'DASH', to: '/', active: screen === 'dash' },
+    { key: 'browse', label: 'ALL', to: '/browse', active: screen === 'browse' || screen === 'detail' },
+    { key: 'storage', label: 'BINS', to: '/storage', active: screen === 'storage' },
+    { key: 'search', label: 'FIND', to: '/search', active: screen === 'search' },
   ];
 });
 
@@ -266,25 +266,29 @@ watch(
     </div>
   </div>
 
-  <nav class="rt-mobile-only" style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 20; background: var(--color-navy); border-top: 3px solid var(--color-orange); display: flex; align-items: stretch">
+  <nav class="rt-mobile-only" style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 20; background: var(--color-navy); border-top: 3px solid var(--color-orange); display: flex; align-items: stretch; padding-bottom: env(safe-area-inset-bottom)">
     <NuxtLink
       v-for="b in bottomBarItems"
-      :key="b.label"
+      :key="b.key"
       :to="b.to"
       :style="{
-        flex: '1', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '12px 4px', textDecoration: 'none', minHeight: '44px',
+        flex: '1', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '3px',
+        padding: '9px 4px 7px', textDecoration: 'none', minHeight: '48px',
         font: `600 9.5px 'Archivo', sans-serif`, letterSpacing: '0.05em',
         color: b.active ? 'var(--color-orange)' : 'rgba(245,241,232,0.7)',
         borderTop: b.active ? '2px solid var(--color-orange)' : '2px solid transparent',
         marginTop: '-2px',
       }"
     >
+      <svg v-if="b.key === 'dash'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><path d="M4 11 L12 4 L20 11" /><path d="M6 10 V20 H18 V10" /></svg>
+      <svg v-else-if="b.key === 'browse'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><rect x="4" y="4" width="7" height="7" /><rect x="13" y="4" width="7" height="7" /><rect x="4" y="13" width="7" height="7" /><rect x="13" y="13" width="7" height="7" /></svg>
+      <svg v-else-if="b.key === 'storage'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><rect x="4" y="8" width="16" height="12" /><path d="M4 8 L6 4 H18 L20 8" /><path d="M10 13 H14" /></svg>
+      <svg v-else-if="b.key === 'search'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><circle cx="10.5" cy="10.5" r="6.5" /><path d="M15.5 15.5 L21 21" /></svg>
       {{ b.label }}
     </NuxtLink>
     <NuxtLink
       to="/items/new"
-      style="flex: 0 0 54px; display: flex; align-items: center; justify-content: center; background: var(--color-orange); color: var(--color-navy); text-decoration: none; font: 400 22px 'Archivo Black', sans-serif; min-height: 44px"
+      style="flex: 0 0 54px; display: flex; align-items: center; justify-content: center; background: var(--color-orange); color: var(--color-navy); text-decoration: none; font: 400 26px 'Archivo Black', sans-serif; min-height: 48px"
     >
       +
     </NuxtLink>

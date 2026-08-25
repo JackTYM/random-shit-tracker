@@ -8,7 +8,7 @@
 <style scoped>
 @media (max-width: 768px) {
   .rt-app-shell {
-    padding-bottom: 62px;
+    padding-bottom: calc(66px + env(safe-area-inset-bottom));
   }
 }
 </style>

@@ -43,7 +43,7 @@ const specs = computed(() => {
       </div>
       <div style="border-top: 1px dashed rgba(22,34,76,0.3); padding-top: 9px; display: flex; align-items: center; justify-content: space-between">
         <span style="font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.06em; color: var(--color-navy)">▪ {{ item.storage_location || '—' }}</span>
-        <span v-if="item.approx_value_usd" style="font: 400 14px 'Archivo Black', sans-serif; color: var(--color-rust)">${{ Number(item.approx_value_usd).toFixed(0) }}</span>
+        <span v-if="item.approx_value_usd" style="font: 400 14px 'Archivo Black', sans-serif; color: var(--color-rust)">${{ (getItemTotalValue(item) ?? 0).toFixed(0) }}</span>
       </div>
     </div>
   </div>

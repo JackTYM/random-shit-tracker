@@ -77,7 +77,7 @@ async function handleSignOut() {
 }
 
 const totalItems = computed(() => items.value.length);
-const totalValue = computed(() => items.value.reduce((sum, it) => sum + Number(it.approx_value_usd ?? 0), 0));
+const totalValue = computed(() => items.value.reduce((sum, it) => sum + (getItemTotalValue(it) ?? 0), 0));
 
 const CATEGORY_CODES: Record<string, string> = {
   motor: 'CAT-01',
@@ -102,7 +102,7 @@ const categoryBreakdown = computed(() => {
 const stats = computed(() => {
   const categoriesWithItems = categoryBreakdown.value.filter((c) => c.count > 0).length;
   const motorItems = items.value.filter((it) => it.category === 'motor');
-  const motorsOnHandCount = motorItems.reduce((sum, it) => sum + Number(categoryDetail(it)?.quantity ?? 0), 0);
+  const motorsOnHandCount = motorItems.reduce((sum, it) => sum + Number(it.quantity ?? 0), 0);
   const motorDesignations = new Set(motorItems.map((it) => categoryDetail(it)?.designation).filter(Boolean));
   return [
     { label: 'Items catalogued', value: String(totalItems.value), sub: `${categoriesWithItems} CATEGORIES` },
@@ -121,7 +121,7 @@ const impulseBars = computed(() => {
   for (const it of motorItems) {
     const cls = String(categoryDetail(it)?.impulse_class ?? '').trim().toUpperCase();
     if (!cls) continue;
-    counts.set(cls, (counts.get(cls) ?? 0) + Number(categoryDetail(it)?.quantity ?? 0));
+    counts.set(cls, (counts.get(cls) ?? 0) + Number(it.quantity ?? 0));
   }
   const ordered = orderImpulseClasses([...counts.keys()]);
   const maxQty = Math.max(1, ...ordered.map((cls) => counts.get(cls) ?? 0));

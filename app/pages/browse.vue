@@ -108,7 +108,7 @@ const filteredItems = computed(() => {
   if (sortBy.value === 'name') {
     sorted.sort((a, b) => a.name.localeCompare(b.name));
   } else if (sortBy.value === 'value') {
-    sorted.sort((a, b) => Number(b.approx_value_usd ?? 0) - Number(a.approx_value_usd ?? 0));
+    sorted.sort((a, b) => (getItemTotalValue(b) ?? 0) - (getItemTotalValue(a) ?? 0));
   } else {
     sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   }

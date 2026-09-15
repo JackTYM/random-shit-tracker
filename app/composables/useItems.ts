@@ -7,11 +7,17 @@ export interface ItemRecord {
   storage_note: string | null;
   reference_code: string | null;
   approx_value_usd: string | null;
+  quantity: number;
   value_estimated_at: string | null;
   notes: string | null;
   created_at: string;
   updated_at: string;
   [key: string]: unknown;
+}
+
+export function getItemTotalValue(item: { approx_value_usd: string | null; quantity: number }): number | null {
+  if (item.approx_value_usd === null) return null;
+  return Number(item.approx_value_usd) * (item.quantity ?? 1);
 }
 
 export const CATEGORY_TABLE: Record<string, string> = {

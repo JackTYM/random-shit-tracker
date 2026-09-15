@@ -12,6 +12,7 @@ export interface SearchResultDetailed {
   reference_code: string | null;
   value_estimated_at: string | null;
   approx_value_usd: string | null;
+  quantity: number;
   storage_location: string | null;
 }
 
@@ -44,7 +45,7 @@ export function useSearchItems() {
     const escaped = escapeForOr(trimmed);
     const { data, error } = await client
       .from('items')
-      .select('id, name, category, manufacturer_or_club, reference_code, value_estimated_at, approx_value_usd, storage_location')
+      .select('id, name, category, manufacturer_or_club, reference_code, value_estimated_at, approx_value_usd, quantity, storage_location')
       .or(`name.ilike."%${escaped}%",manufacturer_or_club.ilike."%${escaped}%"`)
       .limit(limit);
     if (error) throw error;

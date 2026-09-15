@@ -25,7 +25,6 @@ export const CATEGORY_FORM_FIELDS: Record<string, CategoryFormField[]> = {
     { key: 'p_diameter_mm', label: 'Diameter (mm)', type: 'number' },
     { key: 'p_construction', label: 'Construction', type: 'select', options: ['Single-Use', 'Reloadable'] },
     { key: 'p_certification_status', label: 'Certification Status', type: 'select', options: ['Certified', 'Collectable', 'Out of Certification'] },
-    { key: 'p_quantity', label: 'Quantity', type: 'number' },
     { key: 'p_propellant_type', label: 'Propellant Type', type: 'select', options: ['BP', 'Composite'] },
   ],
   kit: [

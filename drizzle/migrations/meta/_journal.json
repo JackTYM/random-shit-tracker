@@ -99,6 +99,13 @@
       "when": 1787533010558,
       "tag": "0013_part_diameter_type",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1789441792662,
+      "tag": "0014_item_quantity",
+      "breakpoints": true
     }
   ]
 }

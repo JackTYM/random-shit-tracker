@@ -17,7 +17,6 @@ export const rocketMotors = pgTable('rocket_motors', {
   diameterMm: numeric('diameter_mm'),
   construction: motorConstructionEnum('construction'),
   certificationStatus: motorCertificationEnum('certification_status'),
-  quantity: integer('quantity'),
   propellantType: motorPropellantEnum('propellant_type'),
 }, (table) => [
   crudPolicy({

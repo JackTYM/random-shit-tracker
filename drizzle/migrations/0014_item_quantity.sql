@@ -1,0 +1,273 @@
+-- Custom migration: add a universal `quantity` column to items (all categories), backfill
+-- it from rocket_motors.quantity for existing motor items (falling back to 1), then drop
+-- the now-redundant category-specific rocket_motors.quantity column. Redefines all 6
+-- create_*_item functions to accept p_quantity and insert it into items instead of (for
+-- motors) rocket_motors.
+
+ALTER TABLE "items" ADD COLUMN "quantity" integer DEFAULT 1 NOT NULL;
+--> statement-breakpoint
+UPDATE "items" SET "quantity" = COALESCE(rm."quantity", 1) FROM "rocket_motors" rm WHERE "items"."id" = rm."item_id" AND "items"."category" = 'motor';
+--> statement-breakpoint
+ALTER TABLE "rocket_motors" DROP COLUMN "quantity";
+--> statement-breakpoint
+DROP FUNCTION public.create_rocket_motor_item(text, text, text, text, numeric, date, text, text, text, numeric, motor_construction, motor_certification_status, integer, motor_propellant_type);
+--> statement-breakpoint
+CREATE FUNCTION public.create_rocket_motor_item(
+  p_name text,
+  p_manufacturer_or_club text DEFAULT NULL,
+  p_storage_location text DEFAULT NULL,
+  p_storage_note text DEFAULT NULL,
+  p_approx_value_usd numeric DEFAULT NULL,
+  p_value_estimated_at date DEFAULT NULL,
+  p_notes text DEFAULT NULL,
+  p_quantity integer DEFAULT 1,
+  p_impulse_class text DEFAULT NULL,
+  p_designation text DEFAULT NULL,
+  p_diameter_mm numeric DEFAULT NULL,
+  p_construction motor_construction DEFAULT NULL,
+  p_certification_status motor_certification_status DEFAULT NULL,
+  p_propellant_type motor_propellant_type DEFAULT NULL
+) RETURNS uuid
+LANGUAGE plpgsql
+SECURITY INVOKER
+AS $$
+DECLARE
+  new_item_id uuid;
+  next_seq integer;
+  new_reference_code text;
+BEGIN
+  SELECT COALESCE(MAX(substring(reference_code from '\d+$')::int), 0) + 1 INTO next_seq
+  FROM items WHERE category = 'motor' AND owner_id = public.current_owner_id();
+  new_reference_code := 'MOT-' || lpad(next_seq::text, 4, '0');
+
+  INSERT INTO items (category, name, manufacturer_or_club, storage_location, storage_note, reference_code, approx_value_usd, value_estimated_at, notes, quantity)
+  VALUES ('motor', p_name, p_manufacturer_or_club, p_storage_location, p_storage_note, new_reference_code, p_approx_value_usd, p_value_estimated_at, p_notes, p_quantity)
+  RETURNING id INTO new_item_id;
+
+  INSERT INTO rocket_motors (item_id, impulse_class, designation, diameter_mm, construction, certification_status, propellant_type)
+  VALUES (new_item_id, p_impulse_class, p_designation, p_diameter_mm, p_construction, p_certification_status, p_propellant_type);
+
+  RETURN new_item_id;
+END;
+$$;
+--> statement-breakpoint
+REVOKE ALL ON FUNCTION public.create_rocket_motor_item(text, text, text, text, numeric, date, text, integer, text, text, numeric, motor_construction, motor_certification_status, motor_propellant_type) FROM PUBLIC;
+--> statement-breakpoint
+GRANT EXECUTE ON FUNCTION public.create_rocket_motor_item(text, text, text, text, numeric, date, text, integer, text, text, numeric, motor_construction, motor_certification_status, motor_propellant_type) TO authenticated;
+--> statement-breakpoint
+DROP FUNCTION public.create_model_rocket_kit_item(text, text, text, text, numeric, date, text, numeric, numeric, numeric);
+--> statement-breakpoint
+CREATE FUNCTION public.create_model_rocket_kit_item(
+  p_name text,
+  p_manufacturer_or_club text DEFAULT NULL,
+  p_storage_location text DEFAULT NULL,
+  p_storage_note text DEFAULT NULL,
+  p_approx_value_usd numeric DEFAULT NULL,
+  p_value_estimated_at date DEFAULT NULL,
+  p_notes text DEFAULT NULL,
+  p_quantity integer DEFAULT 1,
+  p_motor_diameter_mm numeric DEFAULT NULL,
+  p_diameter_in numeric DEFAULT NULL,
+  p_length_in numeric DEFAULT NULL
+) RETURNS uuid
+LANGUAGE plpgsql
+SECURITY INVOKER
+AS $$
+DECLARE
+  new_item_id uuid;
+  next_seq integer;
+  new_reference_code text;
+BEGIN
+  SELECT COALESCE(MAX(substring(reference_code from '\d+$')::int), 0) + 1 INTO next_seq
+  FROM items WHERE category = 'kit' AND owner_id = public.current_owner_id();
+  new_reference_code := 'KIT-' || lpad(next_seq::text, 4, '0');
+
+  INSERT INTO items (category, name, manufacturer_or_club, storage_location, storage_note, reference_code, approx_value_usd, value_estimated_at, notes, quantity)
+  VALUES ('kit', p_name, p_manufacturer_or_club, p_storage_location, p_storage_note, new_reference_code, p_approx_value_usd, p_value_estimated_at, p_notes, p_quantity)
+  RETURNING id INTO new_item_id;
+
+  INSERT INTO model_rocket_kits (item_id, motor_diameter_mm, diameter_in, length_in)
+  VALUES (new_item_id, p_motor_diameter_mm, p_diameter_in, p_length_in);
+
+  RETURN new_item_id;
+END;
+$$;
+--> statement-breakpoint
+REVOKE ALL ON FUNCTION public.create_model_rocket_kit_item(text, text, text, text, numeric, date, text, integer, numeric, numeric, numeric) FROM PUBLIC;
+--> statement-breakpoint
+GRANT EXECUTE ON FUNCTION public.create_model_rocket_kit_item(text, text, text, text, numeric, date, text, integer, numeric, numeric, numeric) TO authenticated;
+--> statement-breakpoint
+DROP FUNCTION public.create_model_airplane_item(text, text, text, text, numeric, date, text, text, airplane_model_type, airplane_model_subtype, text);
+--> statement-breakpoint
+CREATE FUNCTION public.create_model_airplane_item(
+  p_name text,
+  p_manufacturer_or_club text DEFAULT NULL,
+  p_storage_location text DEFAULT NULL,
+  p_storage_note text DEFAULT NULL,
+  p_approx_value_usd numeric DEFAULT NULL,
+  p_value_estimated_at date DEFAULT NULL,
+  p_notes text DEFAULT NULL,
+  p_quantity integer DEFAULT 1,
+  p_wingspan text DEFAULT NULL,
+  p_model_type airplane_model_type DEFAULT NULL,
+  p_model_subtype airplane_model_subtype DEFAULT NULL,
+  p_model_subtype_other text DEFAULT NULL
+) RETURNS uuid
+LANGUAGE plpgsql
+SECURITY INVOKER
+AS $$
+DECLARE
+  new_item_id uuid;
+  next_seq integer;
+  new_reference_code text;
+BEGIN
+  SELECT COALESCE(MAX(substring(reference_code from '\d+$')::int), 0) + 1 INTO next_seq
+  FROM items WHERE category = 'plane' AND owner_id = public.current_owner_id();
+  new_reference_code := 'PLN-' || lpad(next_seq::text, 4, '0');
+
+  INSERT INTO items (category, name, manufacturer_or_club, storage_location, storage_note, reference_code, approx_value_usd, value_estimated_at, notes, quantity)
+  VALUES ('plane', p_name, p_manufacturer_or_club, p_storage_location, p_storage_note, new_reference_code, p_approx_value_usd, p_value_estimated_at, p_notes, p_quantity)
+  RETURNING id INTO new_item_id;
+
+  INSERT INTO model_airplanes (item_id, wingspan, model_type, model_subtype, model_subtype_other)
+  VALUES (new_item_id, p_wingspan, p_model_type, p_model_subtype, p_model_subtype_other);
+
+  RETURN new_item_id;
+END;
+$$;
+--> statement-breakpoint
+REVOKE ALL ON FUNCTION public.create_model_airplane_item(text, text, text, text, numeric, date, text, integer, text, airplane_model_type, airplane_model_subtype, text) FROM PUBLIC;
+--> statement-breakpoint
+GRANT EXECUTE ON FUNCTION public.create_model_airplane_item(text, text, text, text, numeric, date, text, integer, text, airplane_model_type, airplane_model_subtype, text) TO authenticated;
+--> statement-breakpoint
+DROP FUNCTION public.create_model_rocket_part_item(text, text, text, text, numeric, date, text, part_category, text, text, part_material, text, part_diameter_type, numeric, part_diameter_unit, text, part_origin);
+--> statement-breakpoint
+CREATE FUNCTION public.create_model_rocket_part_item(
+  p_name text,
+  p_manufacturer_or_club text DEFAULT NULL,
+  p_storage_location text DEFAULT NULL,
+  p_storage_note text DEFAULT NULL,
+  p_approx_value_usd numeric DEFAULT NULL,
+  p_value_estimated_at date DEFAULT NULL,
+  p_notes text DEFAULT NULL,
+  p_quantity integer DEFAULT 1,
+  p_part_category part_category DEFAULT NULL,
+  p_part_category_other text DEFAULT NULL,
+  p_part_number text DEFAULT NULL,
+  p_material part_material DEFAULT NULL,
+  p_material_other text DEFAULT NULL,
+  p_diameter_type part_diameter_type DEFAULT NULL,
+  p_diameter_value numeric DEFAULT NULL,
+  p_diameter_unit part_diameter_unit DEFAULT NULL,
+  p_diameter_code text DEFAULT NULL,
+  p_origin part_origin DEFAULT NULL
+) RETURNS uuid
+LANGUAGE plpgsql
+SECURITY INVOKER
+AS $$
+DECLARE
+  new_item_id uuid;
+  next_seq integer;
+  new_reference_code text;
+BEGIN
+  SELECT COALESCE(MAX(substring(reference_code from '\d+$')::int), 0) + 1 INTO next_seq
+  FROM items WHERE category = 'part' AND owner_id = public.current_owner_id();
+  new_reference_code := 'PRT-' || lpad(next_seq::text, 4, '0');
+
+  INSERT INTO items (category, name, manufacturer_or_club, storage_location, storage_note, reference_code, approx_value_usd, value_estimated_at, notes, quantity)
+  VALUES ('part', p_name, p_manufacturer_or_club, p_storage_location, p_storage_note, new_reference_code, p_approx_value_usd, p_value_estimated_at, p_notes, p_quantity)
+  RETURNING id INTO new_item_id;
+
+  INSERT INTO model_rocket_parts (item_id, part_category, part_category_other, part_number, material, material_other, diameter_type, diameter_value, diameter_unit, diameter_code, origin)
+  VALUES (new_item_id, p_part_category, p_part_category_other, p_part_number, p_material, p_material_other, p_diameter_type, p_diameter_value, p_diameter_unit, p_diameter_code, p_origin);
+
+  RETURN new_item_id;
+END;
+$$;
+--> statement-breakpoint
+REVOKE ALL ON FUNCTION public.create_model_rocket_part_item(text, text, text, text, numeric, date, text, integer, part_category, text, text, part_material, text, part_diameter_type, numeric, part_diameter_unit, text, part_origin) FROM PUBLIC;
+--> statement-breakpoint
+GRANT EXECUTE ON FUNCTION public.create_model_rocket_part_item(text, text, text, text, numeric, date, text, integer, part_category, text, text, part_material, text, part_diameter_type, numeric, part_diameter_unit, text, part_origin) TO authenticated;
+--> statement-breakpoint
+DROP FUNCTION public.create_printed_material_item(text, text, text, text, numeric, date, text, print_category, integer, text, text);
+--> statement-breakpoint
+CREATE FUNCTION public.create_printed_material_item(
+  p_name text,
+  p_manufacturer_or_club text DEFAULT NULL,
+  p_storage_location text DEFAULT NULL,
+  p_storage_note text DEFAULT NULL,
+  p_approx_value_usd numeric DEFAULT NULL,
+  p_value_estimated_at date DEFAULT NULL,
+  p_notes text DEFAULT NULL,
+  p_quantity integer DEFAULT 1,
+  p_print_category print_category DEFAULT NULL,
+  p_year integer DEFAULT NULL,
+  p_volume_or_issue text DEFAULT NULL,
+  p_kit_number text DEFAULT NULL
+) RETURNS uuid
+LANGUAGE plpgsql
+SECURITY INVOKER
+AS $$
+DECLARE
+  new_item_id uuid;
+  next_seq integer;
+  new_reference_code text;
+BEGIN
+  SELECT COALESCE(MAX(substring(reference_code from '\d+$')::int), 0) + 1 INTO next_seq
+  FROM items WHERE category = 'print' AND owner_id = public.current_owner_id();
+  new_reference_code := 'PRN-' || lpad(next_seq::text, 4, '0');
+
+  INSERT INTO items (category, name, manufacturer_or_club, storage_location, storage_note, reference_code, approx_value_usd, value_estimated_at, notes, quantity)
+  VALUES ('print', p_name, p_manufacturer_or_club, p_storage_location, p_storage_note, new_reference_code, p_approx_value_usd, p_value_estimated_at, p_notes, p_quantity)
+  RETURNING id INTO new_item_id;
+
+  INSERT INTO printed_materials (item_id, print_category, year, volume_or_issue, kit_number)
+  VALUES (new_item_id, p_print_category, p_year, p_volume_or_issue, p_kit_number);
+
+  RETURN new_item_id;
+END;
+$$;
+--> statement-breakpoint
+REVOKE ALL ON FUNCTION public.create_printed_material_item(text, text, text, text, numeric, date, text, integer, print_category, integer, text, text) FROM PUBLIC;
+--> statement-breakpoint
+GRANT EXECUTE ON FUNCTION public.create_printed_material_item(text, text, text, text, numeric, date, text, integer, print_category, integer, text, text) TO authenticated;
+--> statement-breakpoint
+DROP FUNCTION public.create_other_collectable_item(text, text, text, text, numeric, date, text, text);
+--> statement-breakpoint
+CREATE FUNCTION public.create_other_collectable_item(
+  p_name text,
+  p_manufacturer_or_club text DEFAULT NULL,
+  p_storage_location text DEFAULT NULL,
+  p_storage_note text DEFAULT NULL,
+  p_approx_value_usd numeric DEFAULT NULL,
+  p_value_estimated_at date DEFAULT NULL,
+  p_notes text DEFAULT NULL,
+  p_quantity integer DEFAULT 1,
+  p_type text DEFAULT NULL
+) RETURNS uuid
+LANGUAGE plpgsql
+SECURITY INVOKER
+AS $$
+DECLARE
+  new_item_id uuid;
+  next_seq integer;
+  new_reference_code text;
+BEGIN
+  SELECT COALESCE(MAX(substring(reference_code from '\d+$')::int), 0) + 1 INTO next_seq
+  FROM items WHERE category = 'other' AND owner_id = public.current_owner_id();
+  new_reference_code := 'OTH-' || lpad(next_seq::text, 4, '0');
+
+  INSERT INTO items (category, name, manufacturer_or_club, storage_location, storage_note, reference_code, approx_value_usd, value_estimated_at, notes, quantity)
+  VALUES ('other', p_name, p_manufacturer_or_club, p_storage_location, p_storage_note, new_reference_code, p_approx_value_usd, p_value_estimated_at, p_notes, p_quantity)
+  RETURNING id INTO new_item_id;
+
+  INSERT INTO other_collectables (item_id, type)
+  VALUES (new_item_id, p_type);
+
+  RETURN new_item_id;
+END;
+$$;
+--> statement-breakpoint
+REVOKE ALL ON FUNCTION public.create_other_collectable_item(text, text, text, text, numeric, date, text, integer, text) FROM PUBLIC;
+--> statement-breakpoint
+GRANT EXECUTE ON FUNCTION public.create_other_collectable_item(text, text, text, text, numeric, date, text, integer, text) TO authenticated;

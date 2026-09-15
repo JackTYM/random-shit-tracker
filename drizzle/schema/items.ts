@@ -1,4 +1,4 @@
-import { pgTable, pgEnum, uuid, text, numeric, date, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, pgEnum, uuid, text, integer, numeric, date, timestamp } from 'drizzle-orm/pg-core';
 import { crudPolicy, authenticatedRole } from 'drizzle-orm/neon';
 import { ownerDefault, isOwner } from './_rls';
 
@@ -14,6 +14,7 @@ export const items = pgTable('items', {
   storageNote: text('storage_note'),
   referenceCode: text('reference_code'),
   approxValueUsd: numeric('approx_value_usd'),
+  quantity: integer('quantity').notNull().default(1),
   valueEstimatedAt: date('value_estimated_at'),
   notes: text('notes'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

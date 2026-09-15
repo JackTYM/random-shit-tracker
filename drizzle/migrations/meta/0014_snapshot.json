@@ -1,6 +1,6 @@
 {
-  "id": "4269202d-9939-42fc-b3f5-f90e6a99f7e1",
-  "prevId": "3d88b710-c9cd-4e10-987b-26438eb17967",
+  "id": "d7d44387-d06d-48f5-abb6-2e4c0b9aed6a",
+  "prevId": "4269202d-9939-42fc-b3f5-f90e6a99f7e1",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -64,6 +64,13 @@
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
+        },
+        "quantity": {
+          "name": "quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
         },
         "value_estimated_at": {
           "name": "value_estimated_at",
@@ -187,15 +194,15 @@
         "model_airplanes_item_id_items_id_fk": {
           "name": "model_airplanes_item_id_items_id_fk",
           "tableFrom": "model_airplanes",
+          "tableTo": "items",
           "columnsFrom": [
             "item_id"
           ],
-          "tableTo": "items",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -283,15 +290,15 @@
         "model_rocket_kits_item_id_items_id_fk": {
           "name": "model_rocket_kits_item_id_items_id_fk",
           "tableFrom": "model_rocket_kits",
+          "tableTo": "items",
           "columnsFrom": [
             "item_id"
           ],
-          "tableTo": "items",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -426,15 +433,15 @@
         "model_rocket_parts_item_id_items_id_fk": {
           "name": "model_rocket_parts_item_id_items_id_fk",
           "tableFrom": "model_rocket_parts",
+          "tableTo": "items",
           "columnsFrom": [
             "item_id"
           ],
-          "tableTo": "items",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -510,15 +517,15 @@
         "other_collectables_item_id_items_id_fk": {
           "name": "other_collectables_item_id_items_id_fk",
           "tableFrom": "other_collectables",
+          "tableTo": "items",
           "columnsFrom": [
             "item_id"
           ],
-          "tableTo": "items",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -613,15 +620,15 @@
         "printed_materials_item_id_items_id_fk": {
           "name": "printed_materials_item_id_items_id_fk",
           "tableFrom": "printed_materials",
+          "tableTo": "items",
           "columnsFrom": [
             "item_id"
           ],
-          "tableTo": "items",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -717,12 +724,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "quantity": {
-          "name": "quantity",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
         "propellant_type": {
           "name": "propellant_type",
           "type": "motor_propellant_type",
@@ -736,15 +737,15 @@
         "rocket_motors_item_id_items_id_fk": {
           "name": "rocket_motors_item_id_items_id_fk",
           "tableFrom": "rocket_motors",
+          "tableTo": "items",
           "columnsFrom": [
             "item_id"
           ],
-          "tableTo": "items",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -853,24 +854,24 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {
         "item_documents_item_id_items_id_fk": {
           "name": "item_documents_item_id_items_id_fk",
           "tableFrom": "item_documents",
+          "tableTo": "items",
           "columnsFrom": [
             "item_id"
           ],
-          "tableTo": "items",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -966,9 +967,9 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         },
         "item_links_related_item_id_idx": {
           "name": "item_links_related_item_id_idx",
@@ -981,37 +982,37 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {
         "item_links_item_id_items_id_fk": {
           "name": "item_links_item_id_items_id_fk",
           "tableFrom": "item_links",
+          "tableTo": "items",
           "columnsFrom": [
             "item_id"
           ],
-          "tableTo": "items",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         },
         "item_links_related_item_id_items_id_fk": {
           "name": "item_links_related_item_id_items_id_fk",
           "tableFrom": "item_links",
+          "tableTo": "items",
           "columnsFrom": [
             "related_item_id"
           ],
-          "tableTo": "items",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1121,24 +1122,24 @@
             }
           ],
           "isUnique": false,
-          "with": {},
+          "concurrently": false,
           "method": "btree",
-          "concurrently": false
+          "with": {}
         }
       },
       "foreignKeys": {
         "item_photos_item_id_items_id_fk": {
           "name": "item_photos_item_id_items_id_fk",
           "tableFrom": "item_photos",
+          "tableTo": "items",
           "columnsFrom": [
             "item_id"
           ],
-          "tableTo": "items",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1259,6 +1260,22 @@
         "Other"
       ]
     },
+    "public.part_diameter_type": {
+      "name": "part_diameter_type",
+      "schema": "public",
+      "values": [
+        "Measurement",
+        "Tube Code"
+      ]
+    },
+    "public.part_diameter_unit": {
+      "name": "part_diameter_unit",
+      "schema": "public",
+      "values": [
+        "mm",
+        "in"
+      ]
+    },
     "public.part_material": {
       "name": "part_material",
       "schema": "public",
@@ -1276,22 +1293,6 @@
         "Custom"
       ]
     },
-    "public.part_diameter_type": {
-      "name": "part_diameter_type",
-      "schema": "public",
-      "values": [
-        "Measurement",
-        "Tube Code"
-      ]
-    },
-    "public.part_diameter_unit": {
-      "name": "part_diameter_unit",
-      "schema": "public",
-      "values": [
-        "mm",
-        "in"
-      ]
-    },
     "public.print_category": {
       "name": "print_category",
       "schema": "public",
@@ -1307,10 +1308,10 @@
     }
   },
   "schemas": {},
-  "views": {},
   "sequences": {},
   "roles": {},
   "policies": {},
+  "views": {},
   "_meta": {
     "columns": {},
     "schemas": {},

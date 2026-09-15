@@ -12,6 +12,7 @@ const manufacturerOrClub = ref('');
 const storageLocation = ref('');
 const storageNote = ref('');
 const approxValueUsd = ref('');
+const quantity = ref('1');
 const valueEstimatedAt = ref('');
 const notes = ref('');
 
@@ -107,6 +108,7 @@ function resetForm() {
   storageLocation.value = '';
   storageNote.value = '';
   approxValueUsd.value = '';
+  quantity.value = '1';
   valueEstimatedAt.value = '';
   notes.value = '';
   stagedPhotos.value = [];
@@ -136,6 +138,7 @@ async function save(andAddAnother: boolean) {
         storageLocation: storageLocation.value || null,
         storageNote: storageNote.value || null,
         approxValueUsd: approxValueUsd.value ? Number(approxValueUsd.value) : null,
+        quantity: Number(quantity.value) || 1,
         valueEstimatedAt: valueEstimatedAt.value || null,
         notes: notes.value || null,
       },
@@ -243,6 +246,10 @@ async function save(andAddAnother: boolean) {
         <div style="display: flex; flex-direction: column; gap: 5px">
           <label style="font: 500 9.5px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.65)">APPROX. VALUE (USD)</label>
           <input v-model="approxValueUsd" type="number" step="0.01" placeholder="0.00" style="padding: 9px 11px; border: 1px solid var(--color-navy); background: var(--color-paper); font-size: 13.5px; color: var(--color-navy)" />
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 5px">
+          <label style="font: 500 9.5px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.65)">QUANTITY</label>
+          <input v-model="quantity" type="number" min="1" step="1" style="padding: 9px 11px; border: 1px solid var(--color-navy); background: var(--color-paper); font-size: 13.5px; color: var(--color-navy)" />
         </div>
         <div style="display: flex; flex-direction: column; gap: 5px">
           <label style="font: 500 9.5px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.65)">DATE OF ESTIMATE</label>

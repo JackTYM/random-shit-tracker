@@ -64,10 +64,14 @@ const itemSubline = computed(() => {
 
 const detailFields = computed(() => {
   if (!item.value) return [];
+  const general: { label: string; value: unknown }[] = [];
+  if (item.value.quantity > 1) {
+    general.push({ label: 'Quantity', value: item.value.quantity });
+  }
   const detail = categoryDetail(item.value);
-  if (!detail) return [];
+  if (!detail) return general;
   const config = CATEGORY_FORM_FIELDS[item.value.category] ?? [];
-  return config
+  const categoryFields = config
     .filter((f) => !DIAMETER_AUX_KEYS.has(f.key))
     .map((f) => {
       if (f.key === 'p_diameter_value') {
@@ -85,6 +89,7 @@ const detailFields = computed(() => {
       return { label: f.label, value };
     })
     .filter((f) => f.value !== null && f.value !== undefined && f.value !== '');
+  return [...general, ...categoryFields];
 });
 
 // --- Edit mode ---
@@ -98,6 +103,7 @@ const editManufacturerOrClub = ref('');
 const editStorageLocation = ref('');
 const editStorageNote = ref('');
 const editApproxValueUsd = ref('');
+const editQuantity = ref('1');
 const editValueEstimatedAt = ref('');
 const editNotes = ref('');
 const editCategoryValues = ref<Record<string, string>>({});
@@ -110,6 +116,7 @@ function startEdit() {
   editStorageLocation.value = item.value.storage_location ?? '';
   editStorageNote.value = item.value.storage_note ?? '';
   editApproxValueUsd.value = item.value.approx_value_usd ?? '';
+  editQuantity.value = String(item.value.quantity ?? 1);
   editValueEstimatedAt.value = item.value.value_estimated_at ?? '';
   editNotes.value = item.value.notes ?? '';
 
@@ -174,6 +181,7 @@ async function saveEdit() {
         storageLocation: editStorageLocation.value || null,
         storageNote: editStorageNote.value || null,
         approxValueUsd: editApproxValueUsd.value ? Number(editApproxValueUsd.value) : null,
+        quantity: Number(editQuantity.value) || 1,
         valueEstimatedAt: editValueEstimatedAt.value || null,
         notes: editNotes.value || null,
       },
@@ -217,6 +225,7 @@ async function duplicateItem() {
         storageLocation: item.value.storage_location,
         storageNote: item.value.storage_note,
         approxValueUsd: item.value.approx_value_usd != null ? Number(item.value.approx_value_usd) : null,
+        quantity: item.value.quantity ?? 1,
         valueEstimatedAt: item.value.value_estimated_at,
         notes: item.value.notes,
       },
@@ -465,7 +474,7 @@ onMounted(async () => {
           <div class="rt-value-storage-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px">
             <div v-if="item.approx_value_usd" style="background: var(--color-orange); border: 1px solid var(--color-navy); padding: 14px 16px">
               <div style="font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.75)">APPROX. VALUE</div>
-              <div style="font: 400 38px 'Archivo Black', sans-serif; line-height: 1.05; margin-top: 4px">${{ Number(item.approx_value_usd).toFixed(2) }}</div>
+              <div style="font: 400 38px 'Archivo Black', sans-serif; line-height: 1.05; margin-top: 4px">${{ (getItemTotalValue(item) ?? 0).toFixed(2) }}</div>
               <div v-if="item.value_estimated_at" style="font: 400 10.5px 'JetBrains Mono', monospace; color: rgba(22,34,76,0.8); margin-top: 4px">EST. {{ item.value_estimated_at }} · {{ formatItemDetailAge(item.value_estimated_at) }}</div>
             </div>
             <div style="background: #fff; border: 1px solid var(--color-navy); padding: 14px 16px">
@@ -519,6 +528,10 @@ onMounted(async () => {
             <div style="display: flex; flex-direction: column; gap: 5px">
               <label style="font: 500 9.5px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.65)">APPROX. VALUE (USD)</label>
               <input v-model="editApproxValueUsd" type="number" step="0.01" style="padding: 9px 11px; border: 1px solid var(--color-navy); background: var(--color-paper); font-size: 13.5px; color: var(--color-navy)" />
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 5px">
+              <label style="font: 500 9.5px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.65)">QUANTITY</label>
+              <input v-model="editQuantity" type="number" min="1" step="1" style="padding: 9px 11px; border: 1px solid var(--color-navy); background: var(--color-paper); font-size: 13.5px; color: var(--color-navy)" />
             </div>
             <div style="display: flex; flex-direction: column; gap: 5px">
               <label style="font: 500 9.5px 'JetBrains Mono', monospace; letter-spacing: 0.12em; color: rgba(22,34,76,0.65)">DATE OF ESTIMATE</label>

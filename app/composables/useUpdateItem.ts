@@ -34,6 +34,7 @@ export function useUpdateItem() {
         storage_location: shared.storageLocation,
         storage_note: shared.storageNote,
         approx_value_usd: shared.approxValueUsd,
+        quantity: shared.quantity,
         value_estimated_at: shared.valueEstimatedAt,
         notes: shared.notes,
         updated_at: new Date().toISOString(),

@@ -6,6 +6,7 @@ export interface SharedItemFields {
   storageLocation: string | null;
   storageNote: string | null;
   approxValueUsd: number | null;
+  quantity: number;
   valueEstimatedAt: string | null;
   notes: string | null;
 }
@@ -44,6 +45,7 @@ export function useCreateItem() {
       p_storage_location: shared.storageLocation,
       p_storage_note: shared.storageNote,
       p_approx_value_usd: shared.approxValueUsd,
+      p_quantity: shared.quantity,
       p_value_estimated_at: shared.valueEstimatedAt,
       p_notes: shared.notes,
       ...categoryFields,

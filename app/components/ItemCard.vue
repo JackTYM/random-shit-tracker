@@ -28,6 +28,7 @@ const specs = computed(() => {
         <span style="font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.1em; color: rgba(22,34,76,0.5); text-align: center; padding: 0 12px">NO PHOTO</span>
       </div>
       <span style="position: absolute; top: 0; left: 0; background: var(--color-orange); color: var(--color-navy); font: 700 9px 'JetBrains Mono', monospace; letter-spacing: 0.1em; padding: 5px 8px">{{ CATEGORY_LABELS[item.category]?.toUpperCase() }}</span>
+      <span v-if="item.quantity > 1" style="position: absolute; top: 0; right: 0; background: var(--color-navy); color: var(--color-paper); font: 700 9px 'JetBrains Mono', monospace; letter-spacing: 0.1em; padding: 5px 8px">×{{ item.quantity }}</span>
     </div>
     <div style="padding: 12px 14px 13px; display: flex; flex-direction: column; gap: 9px; flex: 1">
       <div>

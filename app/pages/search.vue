@@ -107,7 +107,7 @@ function metaLine(r: SearchResultDetailed): string {
             style="display: flex; align-items: center; gap: 14px; padding: 11px 14px; border-bottom: 1px dotted rgba(22,34,76,0.3); cursor: pointer"
             @click="navigateTo(`/items/${r.id}`)"
           >
-            <img v-if="primaryPhotoByItem[r.id]" :src="primaryPhotoByItem[r.id]" :alt="r.name" style="width: 46px; height: 46px; flex: none; object-fit: cover; border: 1px solid rgba(22,34,76,0.45)" />
+            <img v-if="primaryPhotoByItem[r.id]" :src="thumbUrl(primaryPhotoByItem[r.id], 160)" :alt="r.name" style="width: 46px; height: 46px; flex: none; object-fit: cover; border: 1px solid rgba(22,34,76,0.45)" />
             <div v-else style="width: 46px; height: 46px; flex: none; border: 1px solid rgba(22,34,76,0.45); background: repeating-linear-gradient(135deg, #EAE4D5 0 5px, var(--color-paper) 5px 10px)" />
             <div style="flex: 1; min-width: 0">
               <div style="font: 400 14px 'Archivo Black', sans-serif; text-transform: uppercase">{{ r.name }}</div>

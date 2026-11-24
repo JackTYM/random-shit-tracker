@@ -23,7 +23,7 @@ const specs = computed(() => {
 <template>
   <div style="background: #fff; border: 1px solid var(--color-navy); cursor: pointer; display: flex; flex-direction: column">
     <div style="position: relative; height: 168px; border-bottom: 1px solid var(--color-navy); overflow: hidden; background: var(--color-paper)">
-      <img v-if="photoUrl" :src="photoUrl" :alt="item.name" style="width: 100%; height: 100%; object-fit: cover; display: block" />
+      <img v-if="photoUrl" :src="thumbUrl(photoUrl, 640)" :alt="item.name" style="width: 100%; height: 100%; object-fit: cover; display: block" />
       <div v-else style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: repeating-linear-gradient(135deg, #EAE4D5 0 6px, var(--color-paper) 6px 12px)">
         <span style="font: 500 10px 'JetBrains Mono', monospace; letter-spacing: 0.1em; color: rgba(22,34,76,0.5); text-align: center; padding: 0 12px">NO PHOTO</span>
       </div>

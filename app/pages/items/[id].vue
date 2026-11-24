@@ -425,7 +425,7 @@ onMounted(async () => {
     <div class="rt-detail-grid" style="display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 28px; align-items: start">
       <div>
         <div style="border: 1px solid var(--color-navy); background: #fff; height: 520px; overflow: hidden">
-          <img v-if="primaryPhoto" :src="primaryPhoto.url" :alt="item.name" style="width: 100%; height: 100%; object-fit: contain; display: block; background: var(--color-paper)" />
+          <img v-if="primaryPhoto" :src="thumbUrl(primaryPhoto.url, 1200)" :alt="item.name" style="width: 100%; height: 100%; object-fit: contain; display: block; background: var(--color-paper)" />
           <div v-else style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: repeating-linear-gradient(135deg, #EAE4D5 0 6px, var(--color-paper) 6px 12px)">
             <span style="font: 500 11px 'JetBrains Mono', monospace; letter-spacing: 0.1em; color: rgba(22,34,76,0.5)">NO PHOTO YET</span>
           </div>
@@ -434,7 +434,7 @@ onMounted(async () => {
           <img
             v-for="p in photos.slice(0, 4)"
             :key="p.id"
-            :src="p.url"
+            :src="thumbUrl(p.url, 300)"
             :alt="item.name"
             style="height: 64px; width: 100%; object-fit: cover; border: 1px solid rgba(22,34,76,0.5)"
           />
